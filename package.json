@@ -8,8 +8,9 @@
     "start": "node src/app.js"
   },
   "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "telegraf": "^4.14.1",
-    "dotenv": "^16.3.1"
+    "telegraf": "^4.14.1"
   }
 }

@@ -12,6 +12,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 const bot = new Telegraf(process.env.BOT_TOKEN);
+const cors = require('cors');
+app.use(cors());
+
 
 const ID_CANAL = '-1003858556816'; // seu canal
 let statusBairro = "🟢 PAZ (Sem ocorrências)";
