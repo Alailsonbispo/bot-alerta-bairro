@@ -30,9 +30,10 @@ bot.hears('📢 ENVIAR ALERTA (Admins)', (ctx) => {
   return ctx.reply("⚠️ *QUAL O ALERTA PARA O CANAL?*", {
     parse_mode: 'Markdown',
     ...Markup.keyboard([
-      ['🚨 TIROTEIO / PERIGO', '🚔 Polícia na Área'],
-      ['🚑 Emergência Médica', '🚧 Via Interditada'],
-      ['💡 Falta de Energia', '✅ Tudo em Paz'],
+      ['🚨 TIROTEIO / PERIGO', '🥷 HOMENS ARMADOS'], // Linha 1
+      ['🛸 DRONE CIRCULANDO', '🚔 Polícia na Área'],   // Linha 2
+      ['🚑 Emergência Médica', '🚧 Via Interditada'], // Linha 3
+      ['💡 Falta de Energia', '✅ Tudo em Paz'],      // Linha 4
       ['⬅️ VOLTAR AO MENU']
     ]).resize()
   });
@@ -48,7 +49,7 @@ bot.hears('⬅️ VOLTAR AO MENU', (ctx) => {
 });
 
 bot.hears('Status do Bairro 📊', (ctx) => ctx.reply(`📢 *SITUAÇÃO:* ${statusBairro}`));
-bot.hears('Regras / Ajuda 🛡️', (ctx) => ctx.reply("🛡️ Envie apenas infos reais. Sem fofocas."));
+bot.hears('Regras / Ajuda 🛡️', (ctx) => ctx.reply("🛡️ Envie apenas informações reais. Use com responsabilidade."));
 
 async function postarNoCanal(ctx, texto, novoStatus) {
   if (!ADMINS.includes(ctx.from.id)) return ctx.reply("❌ Negado.");
@@ -57,16 +58,19 @@ async function postarNoCanal(ctx, texto, novoStatus) {
     statusBairro = novoStatus;
     await ctx.reply(`✅ ENVIADO: ${novoStatus}`);
   } catch (e) {
-    await ctx.reply("❌ Erro.");
+    await ctx.reply("❌ Erro ao enviar.");
   }
 }
 
-bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => postarNoCanal(ctx, "‼️ *ALERTA URGENTE: TIROTEIO!* ‼️", "🔴 PERIGO (Tiroteio)"));
-bot.hears('🚔 Polícia na Área', (ctx) => postarNoCanal(ctx, "🚔 *INFORMAÇÃO:* Viatura policial no bairro.", "🔵 POLÍCIA"));
+// MAPEAMENTO DOS NOVOS BOTÕES E DOS ANTIGOS
+bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => postarNoCanal(ctx, "‼️ *ALERTA URGENTE: TIROTEIO!* ‼️\nBusquem abrigo imediatamente!", "🔴 PERIGO (Tiroteio)"));
+bot.hears('🥷 HOMENS ARMADOS', (ctx) => postarNoCanal(ctx, "⚠️ *AVISO:* Relatos de homens armados circulando no bairro. Redobrem a atenção!", "🟠 ALERTA (Homens Armados)"));
+bot.hears('🛸 DRONE CIRCULANDO', (ctx) => postarNoCanal(ctx, "🛸 *DRONE AVISTADO:* Drone estranho sobrevoando a área. Possível monitoramento criminoso.", "🟡 MONITORAMENTO (Drone)"));
+bot.hears('🚔 Polícia na Área', (ctx) => postarNoCanal(ctx, "🚔 *INFORMAÇÃO:* Viatura policial avistada no bairro.", "🔵 POLÍCIA"));
 bot.hears('🚑 Emergência Médica', (ctx) => postarNoCanal(ctx, "🚑 *SAÚDE:* Emergência médica relatada.", "⚠️ MÉDICO"));
 bot.hears('🚧 Via Interditada', (ctx) => postarNoCanal(ctx, "🚧 *TRÂNSITO:* Trecho bloqueado ou acidente.", "🚧 BLOQUEIO"));
 bot.hears('💡 Falta de Energia', (ctx) => postarNoCanal(ctx, "💡 *COELBA:* Falta de energia no bairro.", "💡 SEM LUZ"));
-bot.hears('✅ Tudo em Paz', (ctx) => postarNoCanal(ctx, "✅ *SITUAÇÃO NORMAL:* Bairro em paz.", "🟢 PAZ"));
+bot.hears('✅ Tudo em Paz', (ctx) => postarNoCanal(ctx, "✅ *SITUAÇÃO NORMAL:* O bairro encontra-se em paz.", "🟢 PAZ"));
 
 app.get("/", (req, res) => res.send("Online"));
 app.listen(PORT, () => {
