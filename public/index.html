@@ -6,66 +6,51 @@
   <title>Alerta Bairro - Jardim Santo Inácio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Pulse animado para o indicador */
-    @keyframes pulse-bigger {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.7; }
-    }
-    .pulse-bigger {
-      animation: pulse-bigger 1.5s infinite;
-    }
+    @keyframes pulse-bigger { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
+    .pulse-bigger { animation: pulse-bigger 1.5s infinite; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans">
 
   <header class="text-center py-16 bg-blue-700 text-white shadow-inner">
     <div class="container mx-auto px-6">
-      <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Alerta Jardim Santo Inácio</h1>
-      <p class="text-lg md:text-xl mb-8 opacity-90">Monitoramento comunitário em tempo real. -- BREVE NOVIDADES PRA COMUNIDADE!</p>
-      <a href="https://t.me/AlertaJardimSantoInacio" 
-         target="_blank" 
-         class="bg-white text-blue-700 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-100 transition-all shadow-lg active:scale-95 inline-block">
-         Entrar no Canal Oficial
-      </a>
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tighter">Alerta Jardim Santo Inácio</h1>
+      <p class="text-lg md:text-xl mb-8 opacity-90 font-light">Monitoramento comunitário em tempo real</p>
+      <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="bg-white text-blue-700 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-100 transition-all shadow-lg active:scale-95 inline-block">Entrar no Canal Oficial</a>
     </div>
   </header>
 
   <main class="container mx-auto px-6 -mt-10">
-    <section id="status-section" class="bg-white rounded-3xl p-8 md:p-12 text-center shadow-xl transition-colors duration-1000">
-      <h2 class="text-xl font-semibold text-slate-500 mb-4 uppercase tracking-widest">Status Atual do Bairro</h2>
+    <section id="status-section" class="bg-white rounded-3xl p-8 md:p-12 text-center shadow-xl transition-all duration-1000">
+      <h2 class="text-sm font-bold text-slate-400 mb-4 uppercase tracking-[0.2em]">Situação em Tempo Real</h2>
       
-      <div id="status-card" class="inline-flex items-center gap-6 px-10 py-6 rounded-2xl bg-slate-100 transition-all duration-500">
-        <div id="status-indicator" class="h-6 w-6 rounded-full bg-slate-400 pulse-bigger"></div>
-        <span id="status-text" class="font-black text-3xl md:text-4xl tracking-tight">Sincronizando...</span>
+      <div id="status-card" class="inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-slate-100 transition-all duration-500">
+        <div class="flex items-center gap-4">
+            <div id="status-indicator" class="h-5 w-5 rounded-full bg-slate-400 pulse-bigger"></div>
+            <span id="status-text" class="font-black text-2xl md:text-4xl tracking-tight text-slate-600">Sincronizando...</span>
+        </div>
+        <span id="hora-text" class="text-xs font-medium opacity-60 mt-2"></span>
       </div>
-      
-      <p class="mt-6 text-slate-400 text-sm italic">Atualizado automaticamente a cada 10 segundos</p>
     </section>
 
-    <section class="py-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-white p-8 rounded-2xl shadow-md border-b-4 border-blue-500 hover:shadow-xl transition-all group">
-        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🛸</div>
-        <h3 class="font-bold text-xl mb-2">Monitoramento</h3>
-        <p class="text-slate-600">Avisos imediatos sobre drones desconhecidos ou movimentações suspeitas no espaço aéreo.</p>
+    <section class="py-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-blue-500 hover:shadow-lg transition-all">
+        <div class="text-4xl mb-4">🛸</div>
+        <h3 class="font-bold text-xl mb-2">Drones</h3>
+        <p class="text-slate-500 text-sm">Monitoramento de aeronaves remotas não autorizadas sobre o bairro.</p>
       </div>
-
-      <div class="bg-white p-8 rounded-2xl shadow-md border-b-4 border-red-500 hover:shadow-xl transition-all group">
-        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🚔</div>
+      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-red-500 hover:shadow-lg transition-all">
+        <div class="text-4xl mb-4">🚔</div>
         <h3 class="font-bold text-xl mb-2">Segurança</h3>
-        <p class="text-slate-600">Informações sobre patrulhamento policial e ocorrências críticas para sua proteção.</p>
+        <p class="text-slate-500 text-sm">Alertas críticos sobre segurança pública e presença policial.</p>
       </div>
-
-      <div class="bg-white p-8 rounded-2xl shadow-md border-b-4 border-yellow-500 hover:shadow-xl transition-all group">
-        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🛡️</div>
-        <h3 class="font-bold text-xl mb-2">Comunidade</h3>
-        <p class="text-slate-600">Alertas sobre serviços essenciais, como falta de energia, água ou vias bloqueadas.</p>
+      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-yellow-500 hover:shadow-lg transition-all">
+        <div class="text-4xl mb-4">🛡️</div>
+        <h3 class="font-bold text-xl mb-2">Utilidade</h3>
+        <p class="text-slate-500 text-sm">Informações sobre Coelba, Embasa e trânsito na região.</p>
       </div>
     </section>
   </main>
-
-  <footer class="text-center pb-10 text-slate-400 text-sm">
-    &copy; 2026 Alerta Bairro - Criado para a segurança de todos.
-  </footer>
 
   <script>
     const API_URL = 'https://bot-alerta-bairro.onrender.com/api/status';
@@ -73,41 +58,39 @@
     async function updateStatus() {
       try {
         const response = await fetch(API_URL);
-        if (!response.ok) throw new Error('Falha na resposta');
-        
         const data = await response.json();
+        
         const status = data.status;
+        const hora = data.hora;
 
-        const statusElement = document.getElementById('status-text');
+        document.getElementById('status-text').innerText = status;
+        document.getElementById('hora-text').innerText = `Última atualização: ${hora}`;
+        document.getElementById('status-card').style.opacity = "1";
+
         const indicator = document.getElementById('status-indicator');
         const section = document.getElementById('status-section');
         const card = document.getElementById('status-card');
 
-        statusElement.innerText = status;
-
-        // Lógica de Cores Dinâmicas
         if (status.includes("PAZ")) {
-          indicator.className = "h-6 w-6 rounded-full bg-green-500 pulse-bigger";
-          card.className = "inline-flex items-center gap-6 px-10 py-6 rounded-2xl bg-green-100 transition-all duration-500 text-green-700";
-          section.style.backgroundColor = "#f0fdf4"; // bg-green-50
-        } else if (status.includes("PERIGO") || status.includes("ALERTA") || status.includes("ARMADOS")) {
-          indicator.className = "h-6 w-6 rounded-full bg-red-500 pulse-bigger";
-          card.className = "inline-flex items-center gap-6 px-10 py-6 rounded-2xl bg-red-100 transition-all duration-500 text-red-700";
-          section.style.backgroundColor = "#fef2f2"; // bg-red-50
+          indicator.className = "h-5 w-5 rounded-full bg-green-500 pulse-bigger";
+          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-green-100 text-green-700 transition-all";
+          section.style.backgroundColor = "#f0fdf4";
+        } else if (status.includes("PERIGO") || status.includes("ALERTA")) {
+          indicator.className = "h-5 w-5 rounded-full bg-red-500 pulse-bigger";
+          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-red-100 text-red-700 transition-all";
+          section.style.backgroundColor = "#fef2f2";
         } else {
-          indicator.className = "h-6 w-6 rounded-full bg-yellow-500 pulse-bigger";
-          card.className = "inline-flex items-center gap-6 px-10 py-6 rounded-2xl bg-yellow-100 transition-all duration-500 text-yellow-700";
-          section.style.backgroundColor = "#fffbeb"; // bg-yellow-50
+          indicator.className = "h-5 w-5 rounded-full bg-yellow-500 pulse-bigger";
+          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-yellow-100 text-yellow-700 transition-all";
+          section.style.backgroundColor = "#fffbeb";
         }
       } catch (err) {
-        console.error("Erro:", err);
-        document.getElementById('status-text').innerText = "Reconectando...";
+        document.getElementById('status-text').innerText = "Acordando servidor...";
+        document.getElementById('status-card').style.opacity = "0.5";
       }
     }
 
-    // Atualiza a cada 10 segundos para ser rápido
     setInterval(updateStatus, 10000);
-    // Chama imediatamente ao carregar
     updateStatus();
   </script>
 </body>
