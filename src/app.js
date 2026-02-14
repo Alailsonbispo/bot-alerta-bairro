@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 // Variáveis
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const ID_CANAL = '-1003858556816'; // seu canal
