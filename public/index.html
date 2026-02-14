@@ -1,39 +1,60 @@
-<script>
-    // AQUI ESTÁ O SEGREDO: Aponte para o link completo do Render
-    const URL_DO_SERVIDOR = 'https://bot-alerta-bairro.onrender.com/api/status';
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alerta Bairro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-bigger { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.7; } }
+    .pulse-bigger { animation: pulse-bigger 1.5s infinite; }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <section class="text-center py-20 bg-blue-600 text-white">
+    <h1 class="text-4xl font-bold mb-4">Alerta Bairro Santo Inácio</h1>
+    <p class="mb-6">Segurança em tempo real via Telegram.</p>
+    <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">Entrar no Grupo</a>
+  </section>
+
+  <section id="status-section" class="py-20 text-center">
+    <div id="status-card" class="inline-flex items-center gap-4 px-12 py-8 rounded-3xl shadow-lg bg-white transition-all duration-500">
+      <div id="status-indicator" class="h-8 w-8 rounded-full bg-gray-400 pulse-bigger"></div>
+      <span id="status-text" class="font-bold text-2xl">Sincronizando...</span>
+    </div>
+  </section>
+
+  <script>
+    const API_URL = 'https://bot-alerta-bairro.onrender.com/api/status';
 
     async function updateStatus() {
       try {
-        const response = await fetch(URL_DO_SERVIDOR);
+        const response = await fetch(API_URL);
         const data = await response.json();
+        const status = data.status;
 
-        const statusElement = document.getElementById('status-text');
+        document.getElementById('status-text').innerText = status;
         const indicator = document.getElementById('status-indicator');
-        const statusCard = document.getElementById('status-card');
-        const statusSection = document.getElementById('status-section');
+        const section = document.getElementById('status-section');
 
-        statusElement.innerText = data.status;
-
-        // Atualiza cores do card e do fundo da seção
-        if (data.status.includes("PAZ")) {
+        if (status.includes("PAZ")) {
           indicator.className = "h-8 w-8 rounded-full bg-green-500 pulse-bigger";
-          statusCard.className = "inline-flex items-center gap-4 px-12 py-8 rounded-3xl shadow-lg shadow-pulse bg-green-100 transition-colors duration-500";
-          statusSection.className = "py-20 text-center bg-green-50 transition-colors duration-700";
-        } else if (data.status.includes("PERIGO") || data.status.includes("ARMADOS")) {
+          section.className = "py-20 text-center bg-green-50";
+        } else if (status.includes("PERIGO") || status.includes("ALERTA")) {
           indicator.className = "h-8 w-8 rounded-full bg-red-500 pulse-bigger";
-          statusCard.className = "inline-flex items-center gap-4 px-12 py-8 rounded-3xl shadow-lg shadow-pulse bg-red-100 transition-colors duration-500";
-          statusSection.className = "py-20 text-center bg-red-50 transition-colors duration-700";
+          section.className = "py-20 text-center bg-red-50";
         } else {
           indicator.className = "h-8 w-8 rounded-full bg-yellow-500 pulse-bigger";
-          statusCard.className = "inline-flex items-center gap-4 px-12 py-8 rounded-3xl shadow-lg shadow-pulse bg-yellow-100 transition-colors duration-500";
-          statusSection.className = "py-20 text-center bg-yellow-50 transition-colors duration-700";
+          section.className = "py-20 text-center bg-yellow-50";
         }
       } catch (err) {
-        console.error("Erro ao buscar status", err);
-        document.getElementById('status-text').innerText = "Erro ao conectar";
+        document.getElementById('status-text').innerText = "Servidor em repouso...";
       }
     }
 
-    setInterval(updateStatus, 30000);
+    setInterval(updateStatus, 10000);
     updateStatus();
   </script>
+</body>
+</html>
