@@ -1,12 +1,14 @@
 {
   "name": "bot-alerta-bairro",
   "version": "1.0.0",
-  "main": "src/app.js",
   "type": "module",
+  "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js"
   },
   "dependencies": {
-    "express": "^4.22.1"
+    "dotenv": "^16.4.0",
+    "express": "^4.18.2",
+    "telegraf": "^4.15.3"
   }
 }
