@@ -135,14 +135,12 @@ app.get('/', async (req, res) => {
 });
 
 // --------------------
-// Anti-sleep ping
-// --------------------
+// Anti-sleep ping (opcional)
 if (URL_SITE && URL_SITE.startsWith('https://')) {
   setInterval(() => https.get(URL_SITE), 300000);
 }
 
 // --------------------
-// Launch
-// --------------------
+// Launch polling (Render Free)
 bot.launch({ dropPendingUpdates: true });
 app.listen(PORT, '0.0.0.0', () => console.log(`Rodando na porta ${PORT}`));
