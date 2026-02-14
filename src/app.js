@@ -1,3 +1,22 @@
+import 'dotenv/config';
+import express from 'express';
+import { Telegraf, Markup } from 'telegraf';
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const bot = new Telegraf(process.env.BOT_TOKEN);
+
+const ID_CANAL = '-1003858556816';
+let statusBairro = "🟢 PAZ";
+
+// LOG DE ATIVIDADE (Apenas para você monitorar quem usa)
+bot.use((ctx, next) => {
+  if (ctx.from) {
+    console.log(`👤 Usuário ${ctx.from.id} (${ctx.from.first_name}) interagiu.`);
+  }
+  return next();
+});
+
 // ... (mantenha as importações e configurações iniciais iguais)
 
 bot.start((ctx) => {
