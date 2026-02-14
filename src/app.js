@@ -6,55 +6,50 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const MEU_ID = 6325178788; 
 const ID_CANAL = '-1003858556816';
+let statusBairro = "🟢 PAZ";
 
-// Middleware para logar tudo que acontece no bot
+// LOG DE ATIVIDADE (Apenas para você monitorar quem usa)
 bot.use((ctx, next) => {
-  console.log(`📩 Mensagem recebida de: ${ctx.from.id}`);
+  if (ctx.from) {
+    console.log(`👤 Usuário ${ctx.from.id} (${ctx.from.first_name}) interagiu.`);
+  }
   return next();
 });
 
+// COMANDO START: Agora qualquer um que der /start verá o menu
 bot.start((ctx) => {
-  if (ctx.from.id !== MEU_ID) return ctx.reply("Acesso restrito.");
-  
   return ctx.reply(
-    "🛡️ PAINEL DE CONTROLE ATIVO\nUse os botões abaixo para alertar o bairro:",
-    Markup.keyboard([
-      ['🚨 TIROTEIO / PERIGO'],
-      ['🚔 Polícia na Área', '✅ Tudo em Paz']
-    ]).resize()
+    `🛡️ *MONITORAMENTO COLABORATIVO*\nStatus Atual: ${statusBairro}\n\nSelecione um alerta abaixo para informar ao canal:`,
+    {
+      parse_mode: 'Markdown',
+      ...Markup.keyboard([
+        ['🚨 TIROTEIO / PERIGO'],
+        ['🚔 Polícia na Área', '✅ Tudo em Paz']
+      ]).resize()
+    }
   );
 });
 
-bot.hears('🚨 TIROTEIO / PERIGO', async (ctx) => {
-  if (ctx.from.id !== MEU_ID) return;
+// FUNÇÃO DE ENVIO (Removi a trava de ID)
+async function enviarAlerta(ctx, texto, novoStatus) {
   try {
-    await bot.telegram.sendMessage(ID_CANAL, "‼️ *ALERTA URGENTE: TIROTEIO!* ‼️\nEvitem as ruas agora!", { parse_mode: 'Markdown' });
-    await ctx.reply("✅ Enviado ao canal!");
+    await bot.telegram.sendMessage(ID_CANAL, texto, { parse_mode: 'Markdown' });
+    statusBairro = novoStatus;
+    await ctx.reply(`✅ Obrigado pelo aviso! Alerta enviado ao canal.`);
   } catch (e) {
-    await ctx.reply("❌ Erro ao enviar. O bot é admin do canal?");
-    console.error(e);
+    console.error("Erro ao postar no canal:", e.description);
+    await ctx.reply("❌ Ocorreu um erro ao enviar para o canal.");
   }
-});
+}
 
-// Respostas padrão para Polícia e Paz
-bot.hears('🚔 Polícia na Área', async (ctx) => {
-  if (ctx.from.id !== MEU_ID) return;
-  await bot.telegram.sendMessage(ID_CANAL, "🚔 *ATENÇÃO:* Presença policial no bairro.");
-  ctx.reply("✅ Enviado!");
-});
+// BOTÕES LIBERADOS
+bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => enviarAlerta(ctx, "‼️ *ALERTA URGENTE: TIROTEIO!* ‼️\nMoradores relataram perigo agora!", "🔴 PERIGO"));
+bot.hears('🚔 Polícia na Área', (ctx) => enviarAlerta(ctx, "🚔 *INFORMAÇÃO:* Polícia vista no bairro.", "🔵 POLÍCIA"));
+bot.hears('✅ Tudo em Paz', (ctx) => enviarAlerta(ctx, "✅ *SITUAÇÃO NORMALIZADA:* Bairro tranquilo.", "🟢 PAZ"));
 
-bot.hears('✅ Tudo em Paz', async (ctx) => {
-  if (ctx.from.id !== MEU_ID) return;
-  await bot.telegram.sendMessage(ID_CANAL, "✅ *SITUAÇÃO NORMAL:* O bairro está em paz.");
-  ctx.reply("✅ Enviado!");
-});
-
-// Ligar o servidor e o bot
+app.get("/", (req, res) => res.send("Bot Colaborativo Online"));
 app.listen(PORT, () => {
-  console.log(`🌐 Servidor rodando na porta ${PORT}`);
-  bot.launch({ dropPendingUpdates: true })
-    .then(() => console.log("🤖 BOT ONLINE E PRONTO!"))
-    .catch(err => console.error("ERRO AO LIGAR BOT:", err));
+  console.log(`🌐 Servidor na porta ${PORT}`);
+  bot.launch({ dropPendingUpdates: true });
 });
