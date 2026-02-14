@@ -6,62 +6,63 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// --- CONFIGURAÇÕES ---
-const ADMINS = [6325178788]; // Seu ID (que você pegou no userinfobot)
-const ID_CANAL = '-100123456789'; // O ID que você pegou no Passo 1 (com o -100)
+// --- CONFIGURAÇÃO ---
+const ADMINS = [6325178788]; // Seu ID
+const ID_CANAL = '-1003858556816'; // O ID pego no @JsonDumpBot (COM o -100)
 
-let statusBairro = "🟢 PAZ (Sem ocorrências)";
+let statusBairro = "🟢 PAZ";
 
 const isAdmin = (ctx) => ADMINS.includes(ctx.from.id);
 
-// --- FUNÇÃO DE ENVIO ---
-async function enviarAlerta(ctx, mensagem) {
+// --- FUNÇÃO DE ALERTA ---
+async function dispararAlerta(ctx, texto) {
   try {
-    // Envia para o Canal/Grupo principal
-    // No lugar de enviar para o canal, teste responder direto
-bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => {
-  ctx.reply("TESTE: Eu recebi o seu clique!"); 
-});
+    // 1. Tenta enviar para o CANAL
+    await bot.telegram.sendMessage(ID_CANAL, texto, { parse_mode: 'Markdown' });
+    // 2. Confirma para você no privado que enviou
+    await ctx.reply("✅ Alerta enviado para o Canal!");
+  } catch (err) {
+    console.error("ERRO NO CANAL:", err);
+    await ctx.reply("❌ Erro: O Bot não conseguiu postar no canal. Verifique se ele é ADMIN lá.");
+  }
+}
 
 // --- COMANDOS ---
-
 bot.start((ctx) => {
+  if (!isAdmin(ctx)) return ctx.reply("🏠 *Monitoramento:* Apenas administradores podem usar o painel.");
+  
   return ctx.reply(
-    `🏠 *PAINEL DE CONTROLE - ALERTA BAIRRO*\n\nStatus Atual: *${statusBairro}*`,
-    {
-      parse_mode: 'Markdown',
-      ...Markup.keyboard([
-        ['✅ Tudo em Paz', '🚔 Polícia na Área'],
-        ['🚨 TIROTEIO / PERIGO'],
-        ['📍 Consultar Status']
-      ]).resize()
-    }
+    `🛡️ *PAINEL DE CONTROLE*\nStatus Atual: ${statusBairro}`,
+    Markup.keyboard([
+      ['🚨 TIROTEIO / PERIGO'],
+      ['🚔 Polícia na Área', '✅ Tudo em Paz']
+    ]).resize()
   );
 });
 
 bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => {
-  if (!isAdmin(ctx)) return ctx.reply("❌ Acesso negado.");
-  statusBairro = "🔴 PERIGO CRÍTICO";
-  enviarAlerta(ctx, `‼️ *ALERTA URGENTE:* Relato de tiroteio ou perigo real no bairro.\n\n❌ *EVITEM CIRCULAR NAS RUAS!*`);
+  if (!isAdmin(ctx)) return;
+  statusBairro = "🔴 PERIGO";
+  dispararAlerta(ctx, "⚠️ *ALERTA URGENTE: TIROTEIO OU PERIGO REAL!* ⚠️\n\n❌ Evitem circular pelas ruas do bairro agora.");
 });
 
 bot.hears('🚔 Polícia na Área', (ctx) => {
-  if (!isAdmin(ctx)) return ctx.reply("❌ Acesso negado.");
-  statusBairro = "🔵 POLÍCIA NA ÁREA";
-  enviarAlerta(ctx, `🚔 *INFORMAÇÃO:* Presença policial relatada no bairro. Atenção ao circular.`);
+  if (!isAdmin(ctx)) return;
+  statusBairro = "🔵 POLÍCIA";
+  dispararAlerta(ctx, "🚔 *ATENÇÃO:* Presença policial relatada no bairro. Circulem com cautela.");
 });
 
 bot.hears('✅ Tudo em Paz', (ctx) => {
-  if (!isAdmin(ctx)) return ctx.reply("❌ Acesso negado.");
+  if (!isAdmin(ctx)) return;
   statusBairro = "🟢 PAZ";
-  enviarAlerta(ctx, `✅ *SITUAÇÃO NORMALIZADA:* O bairro está tranquilo no momento.`);
+  dispararAlerta(ctx, "✅ *SITUAÇÃO NORMALIZADA:* O bairro está tranquilo.");
 });
 
-bot.hears('📍 Consultar Status', (ctx) => {
-  ctx.reply(`📊 *Status Agora:* ${statusBairro}`);
+// Remova o bot.launch() antigo e coloque este:
+bot.launch({
+  dropPendingUpdates: true
+}).then(() => {
+  console.log('✅ BOT CONECTADO AO TELEGRAM!');
+}).catch((err) => {
+  console.error('❌ ERRO AO LIGAR:', err);
 });
-
-// --- SERVIDOR ---
-bot.launch();
-app.get("/", (req, res) => res.send("Bot Online"));
-app.listen(PORT, () => console.log(`Rodando na porta ${PORT}`));
