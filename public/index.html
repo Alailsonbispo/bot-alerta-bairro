@@ -10,22 +10,23 @@
     .pulse-bigger { animation: pulse-bigger 1.5s infinite; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
   <header class="text-center py-16 bg-blue-700 text-white shadow-inner">
     <div class="container mx-auto px-6">
-      <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tighter text-shadow-sm">Alerta Jardim Santo Inácio</h1>
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tighter">Alerta Jardim Santo Inácio</h1>
       <p class="text-lg md:text-xl mb-8 opacity-90 font-light">Monitoramento comunitário em tempo real -- Breve melhorias e novidades.</p>
       <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="bg-white text-blue-700 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-100 transition-all shadow-lg active:scale-95 inline-block">Entrar no Canal Oficial</a>
     </div>
   </header>
 
-  <main class="container mx-auto px-6 -mt-10">
-    <section id="status-section" class="bg-white rounded-3xl p-8 md:p-12 text-center shadow-xl transition-all duration-1000">
+  <main class="container mx-auto px-6 flex-grow flex items-center justify-center">
+    <section id="status-section" class="bg-white rounded-3xl p-8 md:p-12 text-center shadow-xl transition-all duration-1000 w-full max-w-lg">
       <h2 class="text-sm font-bold text-slate-400 mb-4 uppercase tracking-[0.2em]">Situação em Tempo Real</h2>
       <div id="status-card" class="inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-slate-100 transition-all duration-500">
         <div class="flex items-center gap-4">
-            <div id="status-indicator" class="h-5 w-5 rounded-full bg-slate-400 pulse-bigger" aria-label="Status"></div>
-            <span id="status-text" class="font-black text-2xl md:text-4xl tracking-tight text-slate-600">Sincronizando...</span>
+          <div id="status-indicator" class="h-5 w-5 rounded-full bg-slate-400 pulse-bigger" aria-label="Status"></div>
+          <span id="status-text" class="font-black text-2xl md:text-4xl tracking-tight text-slate-600">Sincronizando...</span>
         </div>
         <span id="hora-text" class="text-xs font-semibold opacity-50 mt-2"></span>
       </div>
@@ -36,42 +37,65 @@
   <footer class="text-center pb-10 text-slate-400 text-sm">&copy; 2026 Alerta Bairro - Jardim Santo Inácio.</footer>
 
   <script>
-    const evtSource = new EventSource('/api/status-stream');
+    // 🔹 URL do backend (alterar para seu deploy Render)
+    const BACKEND_URL = 'https://bot-alerta-bairro.onrender.com';
+
+    // 🔹 Inicia SSE
+    const evtSource = new EventSource(`${BACKEND_URL}/api/status-stream`);
+
+    const indicator = document.getElementById('status-indicator');
+    const card = document.getElementById('status-card');
+    const section = document.getElementById('status-section');
+
+    const mapStatus = {
+      'PAZ':['bg-green-500','bg-green-100','text-green-700','#f0fdf4'],
+      'PERIGO':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
+      'ALERTA':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
+      'ARMADOS':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
+      'MONITORAMENTO':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
+      'MÉDICO':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
+      'BLOQUEIO':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
+      'SEM LUZ':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
+      'POLÍCIA':['bg-blue-500','bg-blue-100','text-blue-700','#eff6ff']
+    };
+
+    // 🔹 Atualiza status
     evtSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const status = data.status;
       const hora = data.hora;
+
       document.getElementById('status-text').innerText = status;
       document.getElementById('hora-text').innerText = `Atualizado às ${hora}`;
-      const indicator = document.getElementById('status-indicator');
-      const card = document.getElementById('status-card');
-      const mapStatus = {
-        'PAZ':['bg-green-500','bg-green-100','text-green-700','#f0fdf4'],
-        'PERIGO':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
-        'ALERTA':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
-        'ARMADOS':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
-        'MONITORAMENTO':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
-        'MÉDICO':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
-        'BLOQUEIO':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
-        'SEM LUZ':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
-        'POLÍCIA':['bg-blue-500','bg-blue-100','text-blue-700','#eff6ff']
-      };
-      let found=false;
+
+      // Reset classes fixas
+      indicator.className = 'h-5 w-5 rounded-full pulse-bigger';
+      card.className = 'inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl transition-all';
+
+      // Aplica cores dinamicamente
+      let found = false;
       for(const key in mapStatus){
         if(status.includes(key)){
           const [indClass, cardBg, cardText, sectionBg] = mapStatus[key];
-          indicator.className = `h-5 w-5 rounded-full pulse-bigger ${indClass}`;
-          card.className = `inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl ${cardBg} ${cardText} transition-all`;
-          document.getElementById('status-section').style.backgroundColor = sectionBg;
-          found=true;
+          indicator.classList.add(indClass);
+          card.classList.add(cardBg, cardText);
+          section.style.backgroundColor = sectionBg;
+          found = true;
           break;
         }
       }
+
       if(!found){
-        indicator.className='h-5 w-5 rounded-full bg-slate-400 pulse-bigger';
-        card.className='inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-slate-100 text-slate-600 transition-all';
-        document.getElementById('status-section').style.backgroundColor='#ffffff';
+        indicator.classList.add('bg-slate-400');
+        card.classList.add('bg-slate-100','text-slate-600');
+        section.style.backgroundColor='#ffffff';
       }
+    };
+
+    // 🔹 Fallback caso SSE falhe
+    evtSource.onerror = () => {
+      document.getElementById('status-text').innerText = "Conexão perdida...";
+      document.getElementById('hora-text').innerText = "";
     };
   </script>
 </body>

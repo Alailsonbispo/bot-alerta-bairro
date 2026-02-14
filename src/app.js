@@ -19,9 +19,7 @@ app.use(express.json());
 const ADMINS = process.env.ADMINS
   ? process.env.ADMINS.split(',').map(Number)
   : [];
-if (ADMINS.length === 0) {
-  console.warn("⚠️ Variável ADMINS não definida! Nenhum admin autorizado.");
-}
+if (ADMINS.length === 0) console.warn("⚠️ Variável ADMINS não definida! Nenhum admin autorizado.");
 
 const ID_CANAL = process.env.ID_CANAL;
 const URL_SITE = process.env.URL_SITE;
@@ -29,7 +27,18 @@ const URL_SITE = process.env.URL_SITE;
 // --------------------
 // Redis
 // --------------------
-const redis = new Redis(process.env.REDIS_URL);
+let redis;
+let redisReady = false;
+try {
+  if (process.env.REDIS_URL) {
+    redis = new Redis(process.env.REDIS_URL);
+    redis.on('ready', () => { redisReady = true; console.log("Redis conectado!"); });
+    redis.on('error', (err) => { console.error("Redis error:", err); });
+  }
+} catch(e) {
+  console.warn("⚠️ Redis não iniciado, usando memória local.", e);
+}
+
 const STATUS_KEY = 'statusBairro';
 const HORA_KEY = 'ultimaAtualizacao';
 
@@ -45,13 +54,23 @@ app.get('/api/status-stream', (req, res) => {
 
   const clientId = Date.now();
   clients.push({ id: clientId, res });
+
+  // envia estado inicial
+  (async () => {
+    const { status, hora } = await getStatus();
+    res.write(`data: ${JSON.stringify({ status, hora })}\n\n`);
+  })();
+
   req.on('close', () => {
     clients = clients.filter(c => c.id !== clientId);
   });
 });
 
 function sendUpdate(status, hora) {
-  clients.forEach(c => c.res.write(`data: ${JSON.stringify({ status, hora })}\n\n`));
+  clients.forEach(c => {
+    try { c.res.write(`data: ${JSON.stringify({ status, hora })}\n\n`); }
+    catch(e) { console.error("Erro SSE:", e); }
+  });
 }
 
 // --------------------
@@ -60,21 +79,45 @@ function sendUpdate(status, hora) {
 const getBrasiliaTime = () => DateTime.now().setZone('America/Sao_Paulo').toISO();
 
 // --------------------
-// Funções de Status
+// Funções de Status com fallback memória
 // --------------------
+let statusBairro = '🟢 PAZ (Sem ocorrências)';
+let ultimaAtualizacao = getBrasiliaTime();
+
 async function setStatus(novoStatus) {
   const agora = getBrasiliaTime();
-  await redis.set(STATUS_KEY, novoStatus);
-  await redis.set(HORA_KEY, agora);
+  try {
+    if (redis && redisReady) {
+      await redis.set(STATUS_KEY, novoStatus);
+      await redis.set(HORA_KEY, agora);
+    } else {
+      statusBairro = novoStatus;
+      ultimaAtualizacao = agora;
+    }
+  } catch(e) {
+    console.error("Erro ao salvar status:", e);
+    statusBairro = novoStatus;
+    ultimaAtualizacao = agora;
+  }
+
   sendUpdate(novoStatus, DateTime.fromISO(agora).toFormat('dd/MM/yyyy HH:mm'));
   return { status: novoStatus, hora: DateTime.fromISO(agora).toFormat('dd/MM/yyyy HH:mm') };
 }
 
 async function getStatus() {
-  const status = await redis.get(STATUS_KEY) || '🟢 PAZ (Sem ocorrências)';
-  const horaISO = await redis.get(HORA_KEY) || getBrasiliaTime();
-  const hora = DateTime.fromISO(horaISO).toFormat('dd/MM/yyyy HH:mm');
-  return { status, hora };
+  try {
+    if (redis && redisReady) {
+      const status = await redis.get(STATUS_KEY) || '🟢 PAZ (Sem ocorrências)';
+      const horaISO = await redis.get(HORA_KEY) || getBrasiliaTime();
+      const hora = DateTime.fromISO(horaISO).toFormat('dd/MM/yyyy HH:mm');
+      return { status, hora };
+    } else {
+      return { status: statusBairro, hora: DateTime.fromISO(ultimaAtualizacao).toFormat('dd/MM/yyyy HH:mm') };
+    }
+  } catch(e) {
+    console.error("Erro getStatus:", e);
+    return { status: statusBairro, hora: DateTime.fromISO(ultimaAtualizacao).toFormat('dd/MM/yyyy HH:mm') };
+  }
 }
 
 // --------------------
@@ -97,8 +140,8 @@ async function postarNoCanal(ctx, texto, novoStatus) {
     await bot.telegram.sendMessage(ID_CANAL, texto, { parse_mode: 'Markdown' });
     const { status, hora } = await setStatus(novoStatus);
     await ctx.reply(`✅ SITE ATUALIZADO: ${status} às ${hora}`);
-  } catch (e) {
-    console.error(e);
+  } catch(e) {
+    console.error("Erro postarNoCanal:", e);
     await ctx.reply("❌ Erro ao atualizar o site.");
   }
 }
@@ -106,10 +149,7 @@ async function postarNoCanal(ctx, texto, novoStatus) {
 // Menu inicial
 bot.start(ctx => ctx.reply(
   `🛡️ *SISTEMA DE SEGURANÇA*\nStatus Atual: (verifique no site)`,
-  {
-    parse_mode: 'Markdown',
-    ...Markup.keyboard([['📢 ENVIAR ALERTA (Admins)'], ['Status do Bairro 📊', 'Regras / Ajuda 🛡️']]).resize()
-  }
+  { parse_mode: 'Markdown', ...Markup.keyboard([['📢 ENVIAR ALERTA (Admins)'], ['Status do Bairro 📊', 'Regras / Ajuda 🛡️']]).resize() }
 ));
 
 bot.hears('📢 ENVIAR ALERTA (Admins)', ctx => {
@@ -147,7 +187,7 @@ app.get('/', async (req, res) => {
 // --------------------
 // Anti-sleep ping
 // --------------------
-if (URL_SITE) {
+if (URL_SITE && URL_SITE.startsWith('https://')) {
   setInterval(() => https.get(URL_SITE), 300000);
 }
 
