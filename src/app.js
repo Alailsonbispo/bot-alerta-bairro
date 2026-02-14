@@ -1,34 +1,59 @@
 import 'dotenv/config';
 import express from 'express';
-import { Telegraf } from 'telegraf';
+import { Telegraf, Markup } from 'telegraf';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// 1. Configuração do Bot (Pegando o Token das variáveis de ambiente)
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// 2. Comandos do Bot
-bot.start((ctx) => ctx.reply('🚀 Bot Alerta Bairro ativado! Como posso ajudar?'));
-bot.help((ctx) => ctx.reply('Envie uma mensagem para alertar o bairro.'));
-bot.on('text', (ctx) => {
-  ctx.reply(`Recebi seu alerta: "${ctx.message.text}"`);
+// Variável simples para o status (Reinicia se o bot desligar, mas serve para o teste)
+let statusBairro = "🟢 PAZ (Sem ocorrências)";
+
+// --- COMANDOS ---
+
+bot.start((ctx) => {
+  return ctx.reply(
+    `📢 *ALERTA BAIRRO ATIVO*\n\nStatus Atual: *${statusBairro}*\n\nUse os botões abaixo para informar a situação:`,
+    {
+      parse_mode: 'Markdown',
+      ...Markup.keyboard([
+        ['✅ Tudo em Paz', '🚔 Polícia na Área'],
+        ['⚠️ Movimentação Estranha', '🚨 TIROTEIO / PERIGO'],
+        ['📍 Consultar Status']
+      ]).resize()
+    }
+  );
 });
 
-// 3. Iniciar o Bot
-bot.launch()
-  .then(() => console.log('🤖 Bot do Telegram conectado com sucesso!'))
-  .catch((err) => console.error('❌ Erro ao conectar o Bot:', err));
-
-// 4. Servidor Web (Necessário para o Render não dar erro de timeout)
-app.get("/", (req, res) => {
-  res.send("Bot alerta bairro rodando 🚀");
+// Atualizar para PAZ
+bot.hears('✅ Tudo em Paz', (ctx) => {
+  statusBairro = "🟢 PAZ (Sem ocorrências)";
+  ctx.reply(`✅ *${ctx.from.first_name}* informou que o bairro está tranquilo.`, { parse_mode: 'Markdown' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🌍 Servidor Web rodando na porta ${PORT}`);
+// Alerta de Polícia
+bot.hears('🚔 Polícia na Área', (ctx) => {
+  statusBairro = "🔵 POLÍCIA NA ÁREA (Atenção)";
+  ctx.reply(`📢 *AVISO:* Viaturas avistadas por *${ctx.from.first_name}*. Circulem com cuidado!`, { parse_mode: 'Markdown' });
 });
 
-// Enable graceful stop
+// Alerta de TIROTEIO (O mais crítico)
+bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => {
+  statusBairro = "🔴 PERIGO CRÍTICO (Evitem circular)";
+  ctx.reply(`‼️ *ALERTA URGENTE:* Relato de tiros ou perigo real por *${ctx.from.first_name}*.\n\n❌ *NÃO SAIAM DE CASA!*`, { parse_mode: 'Markdown' });
+});
+
+// Consultar Status
+bot.hears('📍 Consultar Status', (ctx) => {
+  ctx.reply(`📊 *Status Agora:* ${statusBairro}`, { parse_mode: 'Markdown' });
+});
+
+// --- INICIALIZAÇÃO ---
+
+bot.launch().then(() => console.log('🛡️ Bot de Segurança Online!'));
+
+app.get("/", (req, res) => res.send("Monitoramento de Bairro Online 🚀"));
+app.listen(PORT, () => console.log(`Porta: ${PORT}`));
+
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
