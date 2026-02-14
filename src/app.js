@@ -3,6 +3,7 @@ import express from 'express';
 import { Telegraf, Markup } from 'telegraf';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors'; // AJUSTADO: Import correto para ES Modules
 
 // Config __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -12,9 +13,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 const bot = new Telegraf(process.env.BOT_TOKEN);
-const cors = require('cors');
-app.use(cors());
 
+// Habilitar CORS - IMPORTANTE para a Vercel ler o status
+app.use(cors());
 
 const ID_CANAL = '-1003858556816'; // seu canal
 let statusBairro = "🟢 PAZ (Sem ocorrências)";
@@ -84,16 +85,16 @@ bot.hears('💡 Falta de Energia', (ctx) => postarNoCanal(ctx, "💡 *COELBA:* F
 bot.hears('✅ Tudo em Paz', (ctx) => postarNoCanal(ctx, "✅ *SITUAÇÃO NORMAL:* O bairro está em paz.", "🟢 PAZ"));
 
 // =======================
-// Servir Landing Page + API
+// API de Status
 // =======================
-app.use(express.static(path.join(__dirname, '../public')));
-
 app.get('/api/status', (req, res) => {
   res.json({ status: statusBairro });
 });
 
+// Servir Landing Page (Opcional se já estiver na Vercel, mas bom manter)
+app.use(express.static(path.join(__dirname, '../public')));
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.send("Servidor Alerta Bairro Online! 🛡️");
 });
 
 // =======================
@@ -104,5 +105,5 @@ bot.launch({ dropPendingUpdates: true })
   .catch(err => console.error("Erro ao iniciar bot:", err));
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
