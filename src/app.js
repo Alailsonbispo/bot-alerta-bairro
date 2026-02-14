@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { Telegraf, Markup } from 'telegraf';
 import cors from 'cors';
-import https from 'https'; // Para o sistema anti-sleep
+import https from 'https';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -10,9 +10,15 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 app.use(cors());
 
-// Variáveis de Estado
+// Variáveis de Estado com Fuso Horário de Brasília
 let statusBairro = "🟢 PAZ (Sem ocorrências)";
-let ultimaAtualizacao = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const getBrasiliaTime = () => new Date().toLocaleTimeString('pt-BR', { 
+  timeZone: 'America/Sao_Paulo', 
+  hour: '2-digit', 
+  minute: '2-digit' 
+});
+
+let ultimaAtualizacao = getBrasiliaTime();
 const ID_CANAL = '-1003858556816'; 
 const ADMINS = [7329695712, 1025904095]; 
 
@@ -48,30 +54,32 @@ bot.hears('📢 ENVIAR ALERTA (Admins)', (ctx) => {
 });
 
 bot.hears('⬅️ VOLTAR AO MENU', (ctx) => {
-  return ctx.reply("Voltando...", {
+  return ctx.reply("Voltando ao menu principal...", {
     ...Markup.keyboard([['📢 ENVIAR ALERTA (Admins)'], ['Status do Bairro 📊', 'Regras / Ajuda 🛡️']]).resize()
   });
 });
+
+bot.hears('Status do Bairro 📊', (ctx) => ctx.reply(`📢 *SITUAÇÃO:* ${statusBairro}\n⏰ Atualizado às: ${ultimaAtualizacao}`));
 
 async function postarNoCanal(ctx, texto, novoStatus) {
   if (!ADMINS.includes(ctx.from.id)) return;
   try {
     await bot.telegram.sendMessage(ID_CANAL, texto, { parse_mode: 'Markdown' });
     statusBairro = novoStatus;
-    ultimaAtualizacao = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    await ctx.reply(`✅ ATUALIZADO: ${novoStatus} às ${ultimaAtualizacao}`);
+    ultimaAtualizacao = getBrasiliaTime();
+    await ctx.reply(`✅ SITE ATUALIZADO: ${novoStatus} às ${ultimaAtualizacao}`);
   } catch (e) {
-    await ctx.reply("❌ Erro ao enviar.");
+    await ctx.reply("❌ Erro ao enviar para o canal.");
   }
 }
 
 // Mapeamento de Alertas
-bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => postarNoCanal(ctx, "‼️ *ALERTA URGENTE: TIROTEIO!*", "🔴 PERIGO (Tiroteio)"));
-bot.hears('🥷 HOMENS ARMADOS', (ctx) => postarNoCanal(ctx, "⚠️ *AVISO:* Homens armados!", "🟠 ALERTA (Homens Armados)"));
-bot.hears('🛸 DRONE CIRCULANDO', (ctx) => postarNoCanal(ctx, "🛸 *DRONE AVISTADO!*", "🟡 MONITORAMENTO (Drone)"));
-bot.hears('🚔 Polícia na Área', (ctx) => postarNoCanal(ctx, "🚔 *INFORMAÇÃO:* Polícia na área.", "🔵 POLÍCIA"));
-bot.hears('💡 Falta Energia / Água', (ctx) => postarNoCanal(ctx, "💡 *COELBA:* Sem luz no bairro.", "💡 SEM LUZ"));
-bot.hears('✅ Tudo em Paz', (ctx) => postarNoCanal(ctx, "✅ *SITUAÇÃO NORMAL*", "🟢 PAZ"));
+bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => postarNoCanal(ctx, "‼️ *ALERTA URGENTE: TIROTEIO!* ‼️\nBusquem abrigo!", "🔴 PERIGO (Tiroteio)"));
+bot.hears('🥷 HOMENS ARMADOS', (ctx) => postarNoCanal(ctx, "⚠️ *AVISO:* Homens armados circulando!", "🟠 ALERTA (Homens Armados)"));
+bot.hears('🛸 DRONE CIRCULANDO', (ctx) => postarNoCanal(ctx, "🛸 *DRONE AVISTADO:* Monitoramento suspeito.", "🟡 MONITORAMENTO (Drone)"));
+bot.hears('🚔 Polícia na Área', (ctx) => postarNoCanal(ctx, "🚔 *INFORMAÇÃO:* Viatura policial avistada.", "🔵 POLÍCIA"));
+bot.hears('💡 Falta de Energia', (ctx) => postarNoCanal(ctx, "💡 *COELBA:* Falta de energia no bairro.", "💡 SEM LUZ"));
+bot.hears('✅ Tudo em Paz', (ctx) => postarNoCanal(ctx, "✅ *SITUAÇÃO NORMAL:* O bairro está em paz.", "🟢 PAZ"));
 
 // =======================
 // API e Anti-Sleep
@@ -82,13 +90,13 @@ app.get('/api/status', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send(`Servidor Ativo. Status: ${statusBairro}`);
+  res.send(`🛡️ Alerta Bairro Online. Fuso: America/Sao_Paulo. Status: ${statusBairro}`);
 });
 
-// Mantém o servidor acordado no Render (Auto-ping a cada 5 min)
+// Mantém o servidor acordado (Ping a cada 5 min)
 setInterval(() => {
   https.get('https://bot-alerta-bairro.onrender.com/');
 }, 300000); 
 
 bot.launch({ dropPendingUpdates: true });
-app.listen(PORT, '0.0.0.0', () => console.log(`Servidor na porta ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Servidor rodando na porta ${PORT}`));
