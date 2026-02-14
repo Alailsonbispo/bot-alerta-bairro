@@ -1,22 +1,65 @@
-# 🛡️ Alerta Jardim Santo Inácio
+# 🛡️ Bot Alerta Bairro – Jardim Santo Inácio
 
-Este é um sistema de segurança comunitária que conecta um **Bot do Telegram** a um **Site (Landing Page)**.
-
-## 📍 O que o projeto faz?
-* **Bot de Alerta:** Administradores enviam alertas (tiroteio, drone, polícia, falta de luz) pelo Telegram.
-* **Site em Tempo Real:** O site muda de cor e status automaticamente assim que o alerta é enviado.
-* **Sincronização:** Mostra a hora exata da última atualização (Horário de Brasília).
-
-## 🚀 Tecnologias
-* **Node.js & Express:** O "motor" que roda no Render.
-* **Telegraf:** A tecnologia que controla o Bot.
-* **Tailwind CSS:** O que deixa o site bonito e moderno.
-* **Vercel:** Onde o site está hospedado.
-
-## 🔧 Como o sistema foi configurado
-* **Anti-Sleep:** O servidor nunca dorme, garantindo resposta rápida.
-* **Segurança:** Apenas administradores autorizados conseguem mudar o status.
-* **CORS:** Liberado para que o site e o bot conversem sem erros.
+Sistema de **segurança comunitária em tempo real**, com bot do Telegram e landing page atualizando o status do bairro automaticamente.
 
 ---
-*Projeto desenvolvido para a segurança dos moradores do Jardim Santo Inácio.*
+
+## 🔹 Funcionalidades
+
+- Recebe **alertas via Telegram** (apenas admins).  
+- Atualiza **status do bairro** em tempo real.  
+- Frontend atualizado com **cores e indicadores dinâmicos**.  
+- Backend com **Redis** para persistência de status.  
+- **Server-Sent Events (SSE)**: página recebe updates sem precisar de refresh.  
+- Hora sempre **correta no fuso de Brasília**.  
+- Anti-sleep: servidor se mantém ativo com ping periódico.
+
+---
+
+## 📂 Estrutura do projeto
+
+# 🛡️ Bot Alerta Bairro – Jardim Santo Inácio
+
+Sistema de **segurança comunitária em tempo real**, com bot do Telegram e landing page atualizando o status do bairro automaticamente.
+
+---
+
+## 🔹 Funcionalidades
+
+- Recebe **alertas via Telegram** (apenas admins).  
+- Atualiza **status do bairro** em tempo real.  
+- Frontend atualizado com **cores e indicadores dinâmicos**.  
+- Backend com **Redis** para persistência de status.  
+- **Server-Sent Events (SSE)**: página recebe updates sem precisar de refresh.  
+- Hora sempre **correta no fuso de Brasília**.  
+- Anti-sleep: servidor se mantém ativo com ping periódico.
+
+---
+
+## 📂 Estrutura do projeto
+
+/bot-alerta-bairro
+├── src/
+│ └── app.js # Backend (Node.js/Express/Bot Telegram)
+├── public/
+│ └── index.html # Frontend/Tailwind/Status em tempo real
+├── .env # Configurações secretas (BOT_TOKEN, etc.)
+├── package.json # Dependências
+└── README.md
+
+
+---
+
+## ⚙️ Tecnologias
+
+- Node.js + Express  
+- Telegraf (Bot Telegram)  
+- Redis (persistência de status)  
+- Luxon (fuso horário e formatação de data/hora)  
+- Tailwind CSS (frontend responsivo)  
+- SSE (Server-Sent Events, atualizações em tempo real)  
+- CORS
+
+---
+
+

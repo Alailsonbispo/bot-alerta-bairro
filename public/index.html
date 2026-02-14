@@ -6,12 +6,11 @@
   <title>Alerta Bairro - Jardim Santo Inácio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @keyframes pulse-bigger { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
+    @keyframes pulse-bigger { 0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:0.7} }
     .pulse-bigger { animation: pulse-bigger 1.5s infinite; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans">
-
   <header class="text-center py-16 bg-blue-700 text-white shadow-inner">
     <div class="container mx-auto px-6">
       <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tighter text-shadow-sm">Alerta Jardim Santo Inácio</h1>
@@ -23,81 +22,57 @@
   <main class="container mx-auto px-6 -mt-10">
     <section id="status-section" class="bg-white rounded-3xl p-8 md:p-12 text-center shadow-xl transition-all duration-1000">
       <h2 class="text-sm font-bold text-slate-400 mb-4 uppercase tracking-[0.2em]">Situação em Tempo Real</h2>
-      
       <div id="status-card" class="inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-slate-100 transition-all duration-500">
         <div class="flex items-center gap-4">
-            <div id="status-indicator" class="h-5 w-5 rounded-full bg-slate-400 pulse-bigger"></div>
+            <div id="status-indicator" class="h-5 w-5 rounded-full bg-slate-400 pulse-bigger" aria-label="Status"></div>
             <span id="status-text" class="font-black text-2xl md:text-4xl tracking-tight text-slate-600">Sincronizando...</span>
         </div>
         <span id="hora-text" class="text-xs font-semibold opacity-50 mt-2"></span>
       </div>
-      
-      <p class="mt-6 text-slate-400 text-xs italic">A página se atualiza sozinha a cada 10 segundos.</p>
-    </section>
-
-    <section class="py-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-blue-500 hover:shadow-lg transition-all">
-        <div class="text-4xl mb-4">🛸</div>
-        <h3 class="font-bold text-xl mb-2 text-blue-600">Drones</h3>
-        <p class="text-slate-500 text-sm">Monitoramento de aeronaves suspeitas sobrevoando a região.</p>
-      </div>
-      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-red-500 hover:shadow-lg transition-all">
-        <div class="text-4xl mb-4">🚔</div>
-        <h3 class="font-bold text-xl mb-2 text-red-600">Segurança</h3>
-        <p class="text-slate-500 text-sm">Alertas críticos de segurança e movimentação policial.</p>
-      </div>
-      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-yellow-500 hover:shadow-lg transition-all">
-        <div class="text-4xl mb-4">🛡️</div>
-        <h3 class="font-bold text-xl mb-2 text-yellow-600">Utilidade</h3>
-        <p class="text-slate-500 text-sm">Informações sobre falta de luz, água e trânsito no bairro.</p>
-      </div>
+      <p class="mt-6 text-slate-400 text-xs italic">Atualização em tempo real.</p>
     </section>
   </main>
 
-  <footer class="text-center pb-10 text-slate-400 text-sm">
-    &copy; 2026 Alerta Bairro - Jardim Santo Inácio.
-  </footer>
+  <footer class="text-center pb-10 text-slate-400 text-sm">&copy; 2026 Alerta Bairro - Jardim Santo Inácio.</footer>
 
   <script>
-    const API_URL = 'https://bot-alerta-bairro.onrender.com/api/status';
-
-    async function updateStatus() {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        
-        const status = data.status;
-        const hora = data.hora;
-
-        document.getElementById('status-text').innerText = status;
-        document.getElementById('hora-text').innerText = `Atualizado às ${hora}`;
-        document.getElementById('status-card').style.opacity = "1";
-
-        const indicator = document.getElementById('status-indicator');
-        const section = document.getElementById('status-section');
-        const card = document.getElementById('status-card');
-
-        if (status.includes("PAZ")) {
-          indicator.className = "h-5 w-5 rounded-full bg-green-500 pulse-bigger";
-          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-green-100 text-green-700 transition-all";
-          section.style.backgroundColor = "#f0fdf4";
-        } else if (status.includes("PERIGO") || status.includes("ALERTA") || status.includes("ARMADOS")) {
-          indicator.className = "h-5 w-5 rounded-full bg-red-500 pulse-bigger";
-          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-red-100 text-red-700 transition-all";
-          section.style.backgroundColor = "#fef2f2";
-        } else {
-          indicator.className = "h-5 w-5 rounded-full bg-yellow-500 pulse-bigger";
-          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-yellow-100 text-yellow-700 transition-all";
-          section.style.backgroundColor = "#fffbeb";
+    const evtSource = new EventSource('/api/status-stream');
+    evtSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const status = data.status;
+      const hora = data.hora;
+      document.getElementById('status-text').innerText = status;
+      document.getElementById('hora-text').innerText = `Atualizado às ${hora}`;
+      const indicator = document.getElementById('status-indicator');
+      const card = document.getElementById('status-card');
+      const mapStatus = {
+        'PAZ':['bg-green-500','bg-green-100','text-green-700','#f0fdf4'],
+        'PERIGO':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
+        'ALERTA':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
+        'ARMADOS':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
+        'MONITORAMENTO':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
+        'MÉDICO':['bg-red-500','bg-red-100','text-red-700','#fef2f2'],
+        'BLOQUEIO':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
+        'SEM LUZ':['bg-yellow-500','bg-yellow-100','text-yellow-700','#fffbeb'],
+        'POLÍCIA':['bg-blue-500','bg-blue-100','text-blue-700','#eff6ff']
+      };
+      let found=false;
+      for(const key in mapStatus){
+        if(status.includes(key)){
+          const [indClass, cardBg, cardText, sectionBg] = mapStatus[key];
+          indicator.className = `h-5 w-5 rounded-full pulse-bigger ${indClass}`;
+          card.className = `inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl ${cardBg} ${cardText} transition-all`;
+          document.getElementById('status-section').style.backgroundColor = sectionBg;
+          found=true;
+          break;
         }
-      } catch (err) {
-        document.getElementById('status-text').innerText = "Conectando ao servidor...";
-        document.getElementById('status-card').style.opacity = "0.5";
       }
-    }
-
-    setInterval(updateStatus, 10000);
-    updateStatus();
+      if(!found){
+        indicator.className='h-5 w-5 rounded-full bg-slate-400 pulse-bigger';
+        card.className='inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-slate-100 text-slate-600 transition-all';
+        document.getElementById('status-section').style.backgroundColor='#ffffff';
+      }
+    };
   </script>
 </body>
 </html>
