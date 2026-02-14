@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import https from 'https';
 import { Telegraf, Markup } from 'telegraf';
-import Redis from 'ioredis';
 import { DateTime } from 'luxon';
 
 const app = express();
@@ -25,24 +24,6 @@ const ID_CANAL = process.env.ID_CANAL;
 const URL_SITE = process.env.URL_SITE;
 
 // --------------------
-// Redis
-// --------------------
-let redis;
-let redisReady = false;
-try {
-  if (process.env.REDIS_URL) {
-    redis = new Redis(process.env.REDIS_URL);
-    redis.on('ready', () => { redisReady = true; console.log("Redis conectado!"); });
-    redis.on('error', (err) => { console.error("Redis error:", err); });
-  }
-} catch(e) {
-  console.warn("⚠️ Redis não iniciado, usando memória local.", e);
-}
-
-const STATUS_KEY = 'statusBairro';
-const HORA_KEY = 'ultimaAtualizacao';
-
-// --------------------
 // SSE (Server-Sent Events)
 // --------------------
 let clients = [];
@@ -56,10 +37,7 @@ app.get('/api/status-stream', (req, res) => {
   clients.push({ id: clientId, res });
 
   // envia estado inicial
-  (async () => {
-    const { status, hora } = await getStatus();
-    res.write(`data: ${JSON.stringify({ status, hora })}\n\n`);
-  })();
+  res.write(`data: ${JSON.stringify({ status: statusBairro, hora: formatHora(ultimaAtualizacao) })}\n\n`);
 
   req.on('close', () => {
     clients = clients.filter(c => c.id !== clientId);
@@ -74,50 +52,23 @@ function sendUpdate(status, hora) {
 }
 
 // --------------------
-// Hora de Brasília
-// --------------------
-const getBrasiliaTime = () => DateTime.now().setZone('America/Sao_Paulo').toISO();
-
-// --------------------
-// Funções de Status com fallback memória
+// Status em memória
 // --------------------
 let statusBairro = '🟢 PAZ (Sem ocorrências)';
-let ultimaAtualizacao = getBrasiliaTime();
+let ultimaAtualizacao = DateTime.now().setZone('America/Sao_Paulo').toISO();
+
+const getBrasiliaTime = () => DateTime.now().setZone('America/Sao_Paulo').toISO();
+const formatHora = (iso) => DateTime.fromISO(iso).toFormat('dd/MM/yyyy HH:mm');
 
 async function setStatus(novoStatus) {
-  const agora = getBrasiliaTime();
-  try {
-    if (redis && redisReady) {
-      await redis.set(STATUS_KEY, novoStatus);
-      await redis.set(HORA_KEY, agora);
-    } else {
-      statusBairro = novoStatus;
-      ultimaAtualizacao = agora;
-    }
-  } catch(e) {
-    console.error("Erro ao salvar status:", e);
-    statusBairro = novoStatus;
-    ultimaAtualizacao = agora;
-  }
-
-  sendUpdate(novoStatus, DateTime.fromISO(agora).toFormat('dd/MM/yyyy HH:mm'));
-  return { status: novoStatus, hora: DateTime.fromISO(agora).toFormat('dd/MM/yyyy HH:mm') };
+  statusBairro = novoStatus;
+  ultimaAtualizacao = getBrasiliaTime();
+  sendUpdate(novoStatus, formatHora(ultimaAtualizacao));
+  return { status: novoStatus, hora: formatHora(ultimaAtualizacao) };
 }
 
 async function getStatus() {
-  try {
-    if (redis && redisReady) {
-      const status = await redis.get(STATUS_KEY) || '🟢 PAZ (Sem ocorrências)';
-      const horaISO = await redis.get(HORA_KEY) || getBrasiliaTime();
-      const hora = DateTime.fromISO(horaISO).toFormat('dd/MM/yyyy HH:mm');
-      return { status, hora };
-    } else {
-      return { status: statusBairro, hora: DateTime.fromISO(ultimaAtualizacao).toFormat('dd/MM/yyyy HH:mm') };
-    }
-  } catch(e) {
-    console.error("Erro getStatus:", e);
-    return { status: statusBairro, hora: DateTime.fromISO(ultimaAtualizacao).toFormat('dd/MM/yyyy HH:mm') };
-  }
+  return { status: statusBairro, hora: formatHora(ultimaAtualizacao) };
 }
 
 // --------------------
@@ -166,7 +117,7 @@ bot.hears('⬅️ VOLTAR AO MENU', ctx => {
   });
 });
 
-// Mapear alertas dinamicamente
+// Mapear alertas
 Object.entries(ALERTS).forEach(([tecla, { texto, status }]) => {
   bot.hears(tecla, ctx => postarNoCanal(ctx, texto, status));
 });
@@ -175,8 +126,7 @@ Object.entries(ALERTS).forEach(([tecla, { texto, status }]) => {
 // Endpoints
 // --------------------
 app.get('/api/status', async (req, res) => {
-  const status = await getStatus();
-  res.json(status);
+  res.json(await getStatus());
 });
 
 app.get('/', async (req, res) => {
