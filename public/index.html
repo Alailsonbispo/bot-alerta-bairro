@@ -6,217 +6,98 @@
   <title>Alerta Bairro - Jardim Santo Inácio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @keyframes pulse-bigger {
-      0%,100%{transform:scale(1);opacity:1}
-      50%{transform:scale(1.2);opacity:0.7}
-    }
+    @keyframes pulse-bigger { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
     .pulse-bigger { animation: pulse-bigger 1.5s infinite; }
-    .text-shadow-sm { text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
   </style>
 </head>
+<body class="bg-slate-50 text-slate-800 font-sans">
 
-<body class="bg-gray-100 text-gray-800 font-sans">
-
-  <!-- HEADER -->
-  <header class="text-center py-16 bg-gray-900 text-white shadow-md">
+  <header class="text-center py-16 bg-blue-700 text-white shadow-inner">
     <div class="container mx-auto px-6">
-      <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-shadow-sm">
-        Alerta Jardim Santo Inácio
-      </h1>
-      <p class="text-lg md:text-xl mb-8 opacity-90 font-light">
-        Monitoramento comunitário em tempo real – Atualizações instantâneas.
-      </p>
-      <a href="https://t.me/AlertaJardimSantoInacio"
-         target="_blank"
-         class="bg-gray-200 text-gray-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-300 transition-all shadow-md active:scale-95 inline-block">
-        Entrar no Canal Oficial
-      </a>
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tighter text-shadow-sm">Alerta Jardim Santo Inácio</h1>
+      <p class="text-lg md:text-xl mb-8 opacity-90 font-light">Monitoramento comunitário em tempo real</p>
+      <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="bg-white text-blue-700 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-100 transition-all shadow-lg active:scale-95 inline-block">Entrar no Canal Oficial</a>
     </div>
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL -->
   <main class="container mx-auto px-6 -mt-10">
-
-    <!-- STATUS EM TEMPO REAL -->
-    <section id="status-section"
-      class="bg-white rounded-3xl p-8 md:p-12 text-center shadow-lg transition-all duration-1000">
-
-      <h2 class="text-sm font-bold text-gray-500 mb-4 uppercase tracking-[0.2em]">
-        Situação em Tempo Real
-      </h2>
-
-      <div id="status-card"
-        class="inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-gray-100 transition-all duration-500">
-
+    <section id="status-section" class="bg-white rounded-3xl p-8 md:p-12 text-center shadow-xl transition-all duration-1000">
+      <h2 class="text-sm font-bold text-slate-400 mb-4 uppercase tracking-[0.2em]">Situação em Tempo Real</h2>
+      
+      <div id="status-card" class="inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-slate-100 transition-all duration-500">
         <div class="flex items-center gap-4">
-          <div id="status-indicator"
-            class="h-5 w-5 rounded-full bg-gray-500 pulse-bigger"></div>
-
-          <span id="status-text"
-            class="font-black text-2xl md:text-4xl tracking-tight text-gray-800">
-            Sincronizando...
-          </span>
+            <div id="status-indicator" class="h-5 w-5 rounded-full bg-slate-400 pulse-bigger"></div>
+            <span id="status-text" class="font-black text-2xl md:text-4xl tracking-tight text-slate-600">Sincronizando...</span>
         </div>
-
-        <span id="hora-text"
-          class="text-xs font-semibold opacity-50 mt-2"></span>
+        <span id="hora-text" class="text-xs font-semibold opacity-50 mt-2"></span>
       </div>
-
-      <p class="mt-6 text-gray-500 text-xs italic">
-        Atualização automática via Telegram.
-      </p>
+      
+      <p class="mt-6 text-slate-400 text-xs italic">A página se atualiza sozinha a cada 10 segundos.</p>
     </section>
 
-    <!-- CARDS INFORMATIVOS -->
     <section class="py-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-white p-8 rounded-2xl shadow-md border-l-4 border-gray-700 hover:shadow-lg transition-all transform hover:-translate-y-1">
-        <div class="text-5xl mb-4">🛸</div>
-        <h3 class="font-bold text-xl mb-2 text-gray-800">Drones</h3>
-        <p class="text-gray-500 text-sm">
-          Monitoramento de aeronaves suspeitas sobrevoando a região.
-        </p>
+      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-blue-500 hover:shadow-lg transition-all">
+        <div class="text-4xl mb-4">🛸</div>
+        <h3 class="font-bold text-xl mb-2 text-blue-600">Drones</h3>
+        <p class="text-slate-500 text-sm">Monitoramento de aeronaves suspeitas sobrevoando a região.</p>
       </div>
-
-      <div class="bg-white p-8 rounded-2xl shadow-md border-l-4 border-red-700 hover:shadow-lg transition-all transform hover:-translate-y-1">
-        <div class="text-5xl mb-4">🚔</div>
-        <h3 class="font-bold text-xl mb-2 text-red-800">Segurança</h3>
-        <p class="text-gray-500 text-sm">
-          Alertas críticos e movimentação policial no bairro.
-        </p>
+      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-red-500 hover:shadow-lg transition-all">
+        <div class="text-4xl mb-4">🚔</div>
+        <h3 class="font-bold text-xl mb-2 text-red-600">Segurança</h3>
+        <p class="text-slate-500 text-sm">Alertas críticos de segurança e movimentação policial.</p>
       </div>
-
-      <div class="bg-white p-8 rounded-2xl shadow-md border-l-4 border-yellow-700 hover:shadow-lg transition-all transform hover:-translate-y-1">
-        <div class="text-5xl mb-4">🛡️</div>
-        <h3 class="font-bold text-xl mb-2 text-yellow-800">Utilidade</h3>
-        <p class="text-gray-500 text-sm">
-          Falta de energia, bloqueios e informações importantes.
-        </p>
+      <div class="bg-white p-8 rounded-2xl shadow-sm border-b-4 border-yellow-500 hover:shadow-lg transition-all">
+        <div class="text-4xl mb-4">🛡️</div>
+        <h3 class="font-bold text-xl mb-2 text-yellow-600">Utilidade</h3>
+        <p class="text-slate-500 text-sm">Informações sobre falta de luz, água e trânsito no bairro.</p>
       </div>
     </section>
-
-    <!-- DIVULGAÇÃO DE SERVIÇOS -->
-    <section class="py-16 bg-gray-50">
-      <div class="container mx-auto px-6">
-        <h2 class="text-2xl font-bold mb-4 text-gray-900">
-          Divulgação de Serviços
-        </h2>
-        <p class="text-gray-600 mb-8">
-          Empresas e profissionais parceiros da comunidade.
-        </p>
-
-        <div id="ads-cards"
-          class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Anúncios serão carregados dinamicamente -->
-        </div>
-      </div>
-    </section>
-
   </main>
 
-  <!-- FOOTER -->
-  <footer class="text-center pb-10 text-gray-500 text-sm">
+  <footer class="text-center pb-10 text-slate-400 text-sm">
     &copy; 2026 Alerta Bairro - Jardim Santo Inácio.
   </footer>
 
-  <!-- ========================= -->
-  <!-- SCRIPT STATUS EM TEMPO REAL -->
-  <!-- ========================= -->
-
   <script>
-    const evtSource = new EventSource('/api/status-stream');
+    const API_URL = 'https://bot-alerta-bairro.onrender.com/api/status';
 
-    evtSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const status = data.status;
-      const hora = data.hora;
+    async function updateStatus() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        
+        const status = data.status;
+        const hora = data.hora;
 
-      const statusText = document.getElementById('status-text');
-      const horaText = document.getElementById('hora-text');
-      const indicator = document.getElementById('status-indicator');
-      const card = document.getElementById('status-card');
-      const section = document.getElementById('status-section');
+        document.getElementById('status-text').innerText = status;
+        document.getElementById('hora-text').innerText = `Atualizado às ${hora}`;
+        document.getElementById('status-card').style.opacity = "1";
 
-      statusText.innerText = status;
-      horaText.innerText = `Atualizado às ${hora}`;
+        const indicator = document.getElementById('status-indicator');
+        const section = document.getElementById('status-section');
+        const card = document.getElementById('status-card');
 
-      const mapStatus = {
-        'PAZ':['bg-green-600','bg-gray-100','text-gray-800','#f8fafc'],
-        'PERIGO':['bg-red-700','bg-gray-100','text-red-800','#fef2f2'],
-        'ALERTA':['bg-red-700','bg-gray-100','text-red-800','#fef2f2'],
-        'ARMADOS':['bg-red-700','bg-gray-100','text-red-800','#fef2f2'],
-        'MONITORAMENTO':['bg-yellow-600','bg-gray-100','text-gray-800','#fefce8'],
-        'MÉDICO':['bg-red-700','bg-gray-100','text-red-800','#fef2f2'],
-        'BLOQUEIO':['bg-yellow-700','bg-gray-100','text-gray-800','#fefce8'],
-        'SEM LUZ':['bg-yellow-700','bg-gray-100','text-gray-800','#fefce8'],
-        'POLÍCIA':['bg-blue-700','bg-gray-100','text-gray-800','#eff6ff']
-      };
-
-      let found = false;
-
-      for (const key in mapStatus) {
-        if(status.includes(key)){
-          const [indClass, cardBg, cardText, sectionBg] = mapStatus[key];
-          indicator.className = `h-5 w-5 rounded-full pulse-bigger ${indClass}`;
-          card.className = `inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl ${cardBg} ${cardText} transition-all`;
-          section.style.backgroundColor = sectionBg;
-          found = true;
-          break;
+        if (status.includes("PAZ")) {
+          indicator.className = "h-5 w-5 rounded-full bg-green-500 pulse-bigger";
+          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-green-100 text-green-700 transition-all";
+          section.style.backgroundColor = "#f0fdf4";
+        } else if (status.includes("PERIGO") || status.includes("ALERTA") || status.includes("ARMADOS")) {
+          indicator.className = "h-5 w-5 rounded-full bg-red-500 pulse-bigger";
+          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-red-100 text-red-700 transition-all";
+          section.style.backgroundColor = "#fef2f2";
+        } else {
+          indicator.className = "h-5 w-5 rounded-full bg-yellow-500 pulse-bigger";
+          card.className = "inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-yellow-100 text-yellow-700 transition-all";
+          section.style.backgroundColor = "#fffbeb";
         }
+      } catch (err) {
+        document.getElementById('status-text').innerText = "Conectando ao servidor...";
+        document.getElementById('status-card').style.opacity = "0.5";
       }
-
-      if(!found){
-        indicator.className='h-5 w-5 rounded-full bg-gray-500 pulse-bigger';
-        card.className='inline-flex flex-col items-center gap-2 px-10 py-6 rounded-2xl bg-gray-100 text-gray-800 transition-all';
-        section.style.backgroundColor='#ffffff';
-      }
-    };
-  </script>
-
-  <!-- ========================= -->
-  <!-- SCRIPT ANÚNCIOS DINÂMICOS -->
-  <!-- ========================= -->
-
-  <script>
-    const adsContainer = document.getElementById('ads-cards');
-
-    // Carrega ao abrir página
-    fetch('/api/ads')
-      .then(res => res.json())
-      .then(anuncios => renderAds(anuncios));
-
-    // Atualização em tempo real
-    const evtAds = new EventSource('/api/ads-stream');
-    evtAds.onmessage = (event) => {
-      const anuncios = JSON.parse(event.data);
-      renderAds(anuncios);
-    };
-
-    function renderAds(anuncios) {
-      adsContainer.innerHTML = '';
-
-      if (!anuncios.length) {
-        adsContainer.innerHTML = `
-          <div class="col-span-3 text-center text-gray-500">
-            Nenhum parceiro cadastrado no momento.
-          </div>
-        `;
-        return;
-      }
-
-      anuncios.forEach(ad => {
-        adsContainer.innerHTML += `
-          <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
-            <h3 class="font-bold text-xl mb-2 text-gray-800">${ad.nome}</h3>
-            <p class="text-gray-500 text-sm mb-4">${ad.descricao}</p>
-            <a href="${ad.link}" target="_blank"
-              class="text-blue-700 font-semibold hover:underline">
-              Entrar em contato
-            </a>
-          </div>
-        `;
-      });
     }
-  </script>
 
+    setInterval(updateStatus, 10000);
+    updateStatus();
+  </script>
 </body>
 </html>
