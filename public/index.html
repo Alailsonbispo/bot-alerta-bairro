@@ -1,74 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alerta Bairro</title>
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Pulse maior para o indicador */
-    @keyframes pulse-bigger {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.7; }
-    }
-    .pulse-bigger {
-      animation: pulse-bigger 1.5s infinite;
-    }
+<script>
+    // AQUI ESTÁ O SEGREDO: Aponte para o link completo do Render
+    const URL_DO_SERVIDOR = 'https://bot-alerta-bairro.onrender.com/api/status';
 
-    /* Sombra animada no card */
-    @keyframes shadow-pulse {
-      0%, 100% { box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-      50% { box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
-    }
-    .shadow-pulse {
-      animation: shadow-pulse 2s infinite;
-    }
-  </style>
-</head>
-<body class="bg-gray-100 text-gray-800 font-sans">
-
-  <!-- Hero Section -->
-  <section class="text-center py-20 bg-blue-600 text-white">
-    <h1 class="text-4xl font-bold mb-4">Alerta Bairro em Tempo Real</h1>
-    <p class="mb-6">Receba notificações sobre segurança e nosso bairro diretamente no Telegram.</p>
-    <a href="https://t.me/AlertaJardimSantoInacio" 
-   target="_blank" 
-   class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
-   Entrar no Telegram
-</a>
-  </section>
-
-  <!-- Status Dinâmico -->
-  <section id="status-section" class="py-20 text-center transition-colors duration-700">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">Status Atual do Bairro</h2>
-    <div id="status-card" class="inline-flex items-center gap-4 px-12 py-8 rounded-3xl shadow-lg shadow-pulse transition-colors duration-500">
-      <div id="status-indicator" class="h-8 w-8 rounded-full pulse-bigger"></div>
-      <span id="status-text" class="font-bold text-2xl">Carregando...</span>
-    </div>
-  </section>
-
-  <!-- Funcionalidades -->
-  <section class="py-10 grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
-    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-      <h3 class="font-bold mb-2 text-xl">🛸 Drone</h3>
-      <p>Monitoramento aéreo suspeito.</p>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-      <h3 class="font-bold mb-2 text-xl">🚔 Polícia</h3>
-      <p>Alertas de patrulha e presença policial.</p>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-      <h3 class="font-bold mb-2 text-xl">🛡️ Segurança</h3>
-      <p>Notificações sobre incidentes e riscos.</p>
-    </div>
-  </section>
-
-  <!-- Script para atualizar status -->
-  <script>
     async function updateStatus() {
       try {
-        const response = await fetch('/api/status');
+        const response = await fetch(URL_DO_SERVIDOR);
         const data = await response.json();
 
         const statusElement = document.getElementById('status-text');
@@ -94,12 +30,10 @@
         }
       } catch (err) {
         console.error("Erro ao buscar status", err);
+        document.getElementById('status-text').innerText = "Erro ao conectar";
       }
     }
 
     setInterval(updateStatus, 30000);
     updateStatus();
   </script>
-
-</body>
-</html>
