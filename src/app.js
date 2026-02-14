@@ -13,16 +13,29 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 app.use(cors());
 app.use(express.json());
 
+// --------------------
+// Variáveis de ambiente
+// --------------------
+const ADMINS = process.env.ADMINS
+  ? process.env.ADMINS.split(',').map(Number)
+  : [];
+if (ADMINS.length === 0) {
+  console.warn("⚠️ Variável ADMINS não definida! Nenhum admin autorizado.");
+}
+
+const ID_CANAL = process.env.ID_CANAL;
+const URL_SITE = process.env.URL_SITE;
+
+// --------------------
 // Redis
+// --------------------
 const redis = new Redis(process.env.REDIS_URL);
 const STATUS_KEY = 'statusBairro';
 const HORA_KEY = 'ultimaAtualizacao';
 
-// Admins
-const ADMINS = process.env.ADMINS.split(',').map(Number);
-const ID_CANAL = process.env.ID_CANAL;
-
-// SSE
+// --------------------
+// SSE (Server-Sent Events)
+// --------------------
 let clients = [];
 app.get('/api/status-stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -41,10 +54,14 @@ function sendUpdate(status, hora) {
   clients.forEach(c => c.res.write(`data: ${JSON.stringify({ status, hora })}\n\n`));
 }
 
-// Função de hora de Brasília
+// --------------------
+// Hora de Brasília
+// --------------------
 const getBrasiliaTime = () => DateTime.now().setZone('America/Sao_Paulo').toISO();
 
-// Funções de status
+// --------------------
+// Funções de Status
+// --------------------
 async function setStatus(novoStatus) {
   const agora = getBrasiliaTime();
   await redis.set(STATUS_KEY, novoStatus);
@@ -60,7 +77,9 @@ async function getStatus() {
   return { status, hora };
 }
 
+// --------------------
 // Bot Telegram
+// --------------------
 const ALERTS = {
   '🚨 TIROTEIO / PERIGO': { texto: "‼️ *ALERTA URGENTE: TIROTEIO!*", status: "🔴 PERIGO (Tiroteio)" },
   '🥷 HOMENS ARMADOS': { texto: "⚠️ *AVISO:* Homens armados!", status: "🟠 ALERTA (Homens Armados)" },
@@ -84,7 +103,7 @@ async function postarNoCanal(ctx, texto, novoStatus) {
   }
 }
 
-// Menu
+// Menu inicial
 bot.start(ctx => ctx.reply(
   `🛡️ *SISTEMA DE SEGURANÇA*\nStatus Atual: (verifique no site)`,
   {
@@ -112,7 +131,9 @@ Object.entries(ALERTS).forEach(([tecla, { texto, status }]) => {
   bot.hears(tecla, ctx => postarNoCanal(ctx, texto, status));
 });
 
+// --------------------
 // Endpoints
+// --------------------
 app.get('/api/status', async (req, res) => {
   const status = await getStatus();
   res.json(status);
@@ -123,9 +144,15 @@ app.get('/', async (req, res) => {
   res.send(`🛡️ Alerta Bairro Ativo. Status: ${status}`);
 });
 
+// --------------------
 // Anti-sleep ping
-setInterval(() => https.get(process.env.URL_SITE), 300000);
+// --------------------
+if (URL_SITE) {
+  setInterval(() => https.get(URL_SITE), 300000);
+}
 
+// --------------------
 // Launch
+// --------------------
 bot.launch({ dropPendingUpdates: true });
 app.listen(PORT, '0.0.0.0', () => console.log(`Rodando na porta ${PORT}`));
