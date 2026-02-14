@@ -5,6 +5,7 @@ import { Telegraf, Markup } from 'telegraf';
 const app = express();
 const PORT = process.env.PORT || 3000;
 const bot = new Telegraf(process.env.BOT_TOKEN);
+cont ADMINS = [7329695712]
 
 // Variável simples para o status (Reinicia se o bot desligar, mas serve para o teste)
 let statusBairro = "🟢 PAZ (Sem ocorrências)";
