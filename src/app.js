@@ -18,14 +18,10 @@ const isAdmin = (ctx) => ADMINS.includes(ctx.from.id);
 async function enviarAlerta(ctx, mensagem) {
   try {
     // Envia para o Canal/Grupo principal
-    await bot.telegram.sendMessage(ID_CANAL, mensagem, { parse_mode: 'Markdown' });
-    // Avisa você no privado que deu certo
-    await ctx.reply("✅ Alerta publicado no canal!");
-  } catch (err) {
-    console.error("Erro ao enviar:", err);
-    await ctx.reply("❌ Erro ao enviar para o canal. O bot é administrador lá?");
-  }
-}
+    // No lugar de enviar para o canal, teste responder direto
+bot.hears('🚨 TIROTEIO / PERIGO', (ctx) => {
+  ctx.reply("TESTE: Eu recebi o seu clique!"); 
+});
 
 // --- COMANDOS ---
 
