@@ -3,165 +3,203 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Alerta JSI - Oficial</title>
+  <title>Portal Alerta JSI - Monitoramento em Tempo Real</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
-    @keyframes pulse-soft { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
-    .pulse-soft { animation: pulse-soft 2s infinite ease-in-out; }
-    .status-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-    .animate-zoom { animation: zoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    @keyframes zoom { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; scroll-behavior: smooth; }
+    .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    @keyframes pulse-ring { 0% { transform: scale(0.33); opacity: 1; } 80%, 100% { opacity: 0; } }
+    .pulse-ring { position: relative; }
+    .pulse-ring::before { 
+      content: ''; position: absolute; left: -10px; top: -10px; width: calc(100% + 20px); height: calc(100% + 20px); 
+      border-radius: 9999px; animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; 
+    }
+    .paz::before { background-color: #10b981; }
+    .perigo::before { background-color: #f43f5e; }
+    .alerta::before { background-color: #f59e0b; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+    .animate-shimmer { animation: shimmer 2s infinite; }
+    .animate-zoom { animation: zoom 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes zoom { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 leading-tight">
+<body class="antialiased min-h-screen flex flex-col justify-between">
 
-  <header class="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 pt-16 pb-24 text-white text-center">
-    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-widest uppercase bg-blue-500/30 rounded-full border border-blue-400/30">
-        🛡️ Monitoramento Jardim Santo Inácio
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full"></div>
+    <div class="absolute bottom-[10%] -right-[10%] w-[30%] h-[30%] bg-indigo-600/10 blur-[100px] rounded-full"></div>
+  </div>
+
+  <main class="relative z-10 flex-grow flex flex-col items-center justify-center px-6 py-12">
+    
+    <div class="mb-10 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6">
+        <span class="relative flex h-2 w-2 text-green-500">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+        </span>
+        Live: Jardim Santo Inácio
       </div>
-      <h1 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">Portal Alerta <span class="text-blue-300">JSI</span></h1>
-      <p class="text-lg md:text-xl mb-8 text-blue-100 max-w-2xl mx-auto font-light">Segurança e utilidade pública em tempo real para nossa comunidade.</p>
-      <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="bg-white text-blue-900 px-8 py-3.5 rounded-xl font-bold text-md hover:bg-blue-50 transition-all shadow-xl hover:-translate-y-1 active:scale-95 inline-block">
-        Entrar no Canal Oficial
-      </a>
+      <h1 class="text-5xl md:text-7xl font-black tracking-tighter italic uppercase">ALERTA<span class="text-blue-500">JSI</span></h1>
     </div>
-  </header>
 
-  <main class="container mx-auto px-6 -mt-16 relative z-20">
-    <section id="status-section" class="status-transition glass rounded-[2.5rem] p-8 md:p-14 text-center shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
-      <h2 class="text-xs font-bold text-slate-400 mb-6 uppercase tracking-[0.3em]">Condição Atual do Bairro</h2>
+    <div id="status-container" class="glass w-full max-w-lg rounded-[3.5rem] p-10 md:p-14 text-center shadow-2xl relative overflow-hidden transition-all duration-700">
+      <div id="status-glow" class="absolute inset-0 opacity-20 transition-colors duration-1000"></div>
       
-      <div id="status-card" class="status-transition inline-flex flex-col items-center gap-4 px-10 py-8 rounded-[2rem] bg-slate-100/50 border border-slate-200">
-        <div class="flex items-center gap-5">
-            <div id="status-indicator" class="h-6 w-6 rounded-full bg-slate-400 shadow-lg pulse-soft"></div>
-            <span id="status-text" class="font-extrabold text-3xl md:text-5xl tracking-tighter text-slate-700 font-black">Sincronizando...</span>
+      <div class="relative z-10">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] mb-10 text-shadow">Condição do Bairro Agora</p>
+        
+        <div class="flex flex-col items-center gap-6">
+          <div id="status-indicator" class="h-5 w-5 rounded-full bg-slate-600 pulse-ring"></div>
+          <h2 id="status-text" class="text-4xl md:text-6xl font-black italic tracking-tighter uppercase transition-all duration-500 text-slate-400">
+            Sincronizando
+          </h2>
         </div>
-        <div class="flex items-center gap-2 text-slate-400 font-medium bg-white/50 px-4 py-1 rounded-full border border-slate-200/50">
-            <span class="text-[10px] font-bold uppercase tracking-widest">Atualizado:</span>
-            <span id="hora-text" class="text-xs font-black text-slate-600">--:--</span>
+
+        <div class="mt-12 pt-8 border-t border-white/5 flex items-center justify-center gap-6">
+          <div class="text-left">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Atualizado às</p>
+            <p id="hora-text" class="text-xl font-bold font-mono text-white">--:--</p>
+          </div>
+          <div class="h-10 w-[1px] bg-white/10"></div>
+          <div class="text-left">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest opacity-60">Status</p>
+            <p class="text-sm font-black italic text-emerald-500 mt-1 uppercase">Ativo</p>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 py-16 max-w-5xl mx-auto">
-      <div class="group bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-2xl transition-all duration-300">
-        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform font-bold">🛍️</div>
-        <h3 class="font-extrabold text-xl mb-3 text-slate-800 tracking-tight">Guia Comercial</h3>
-        <p class="text-slate-500 text-sm leading-relaxed mb-6 italic">Em breve: Divulgação gratuita para empreendedores do bairro.</p>
-        <span class="inline-block text-blue-600 font-bold text-[10px] uppercase tracking-[0.2em] bg-blue-50 px-4 py-1.5 rounded-full font-black">Em Desenvolvimento</span>
-      </div>
-
-      <div class="group bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-2xl transition-all duration-300">
-        <div class="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform font-bold">📞</div>
-        <h3 class="font-extrabold text-xl mb-3 text-slate-800 tracking-tight text-shadow-sm">Telefones Úteis</h3>
-        <p class="text-slate-500 text-sm leading-relaxed mb-6">Contatos de emergência e serviços públicos de Salvador.</p>
-        <button onclick="toggleModal()" class="w-full md:w-auto text-red-600 font-black text-xs uppercase tracking-[0.2em] border-2 border-red-50 px-8 py-3 rounded-xl hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm">
-          Ver Lista Completa
+    <div class="w-full max-w-lg mt-10 space-y-4">
+      <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="group relative flex items-center justify-center gap-3 w-full bg-[#0088cc] hover:bg-[#0099e6] text-white py-6 rounded-[2rem] font-black text-xl transition-all shadow-2xl shadow-blue-500/20 overflow-hidden">
+        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.891 8.146l-1.897 8.942c-.143.64-.521.797-1.057.497l-2.89-2.13-1.394 1.342c-.154.154-.283.283-.58.283l.206-2.923 5.319-4.805c.231-.206-.05-.32-.358-.114l-6.573 4.138-2.831-.885c-.615-.192-.628-.615.128-.91l11.066-4.264c.513-.192.961.114.761.902z"/></svg>
+        ENTRAR NO CANAL OFICIAL
+      </a>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <button onclick="toggleModal()" class="bg-slate-900 border border-slate-800 text-slate-400 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-white transition-all shadow-lg">
+          Telefones Úteis
+        </button>
+        <button onclick="compartilhar()" class="bg-slate-900 border border-slate-800 text-slate-400 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-white transition-all shadow-lg flex items-center justify-center gap-2">
+           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8m-11-4 4-4 4 4m-4-4v13"/></svg>
+           Compartilhar
         </button>
       </div>
     </div>
 
-    <section class="py-12 border-t border-slate-200/60 mt-4 mb-20">
-      <h3 class="text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.5em] mb-12">Como o Portal Funciona?</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto px-6">
-        <div class="text-center">
-          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-200 text-slate-600 font-black mb-4 shadow-inner">1</div>
-          <h4 class="font-bold text-slate-700 mb-2 tracking-tight">Monitoramento</h4>
-          <p class="text-slate-500 text-xs leading-relaxed">Colaboradores acompanham a movimentação do bairro em tempo real.</p>
+    <div class="w-full max-w-lg mt-16 pt-8 border-t border-white/5">
+        <h3 class="text-center text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-10">Diferenciais do Telegram</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center group">
+                <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/10 transition-colors">🛡️</div>
+                <p class="text-[11px] font-black uppercase mb-1 tracking-wider">Privacidade</p>
+                <p class="text-[9px] text-slate-500 leading-tight">Ninguém vê seu número de telefone ou seus dados pessoais.</p>
+            </div>
+            <div class="text-center group">
+                <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/10 transition-colors">⚡</div>
+                <p class="text-[11px] font-black uppercase mb-1 tracking-wider">Velocidade</p>
+                <p class="text-[9px] text-slate-500 leading-tight">As notificações chegam antes de qualquer outra rede social.</p>
+            </div>
+            <div class="text-center group">
+                <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/10 transition-colors">📂</div>
+                <p class="text-[11px] font-black uppercase mb-1 tracking-wider">Histórico</p>
+                <p class="text-[9px] text-slate-500 leading-tight">Veja tudo o que aconteceu no bairro desde o início do canal.</p>
+            </div>
         </div>
-        <div class="text-center">
-          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 text-white font-black mb-4 shadow-lg pulse-soft">2</div>
-          <h4 class="font-bold text-slate-700 mb-2 tracking-tight">Atualização Live</h4>
-          <p class="text-slate-500 text-xs leading-relaxed font-semibold text-blue-600/70 uppercase tracking-tighter">O site atualiza instantaneamente a cada alerta confirmado.</p>
-        </div>
-        <div class="text-center">
-          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-200 text-slate-600 font-black mb-4 shadow-inner">3</div>
-          <h4 class="font-bold text-slate-700 mb-2 tracking-tight">Prevenção</h4>
-          <p class="text-slate-500 text-xs leading-relaxed">Consulte o status antes de sair ou chegar em casa para sua segurança.</p>
-        </div>
-      </div>
-    </section>
+    </div>
+
   </main>
 
-  <div id="modal-telefones" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-zoom">
-      <div class="bg-red-600 p-6 text-white flex justify-between items-center">
-        <h3 class="font-black text-xl tracking-tight uppercase italic font-black">Emergência Salvador</h3>
-        <button onclick="toggleModal()" class="bg-white/20 hover:bg-white/40 w-10 h-10 rounded-full flex items-center justify-center transition-all font-black">✕</button>
+  <footer class="relative z-10 py-12 text-center border-t border-white/5">
+    <p class="text-slate-600 text-[10px] font-black uppercase tracking-[0.5em] italic">
+      &copy; 2026 Alerta JSI - Inteligência Comunitária
+    </p>
+  </footer>
+
+  <div id="modal-telefones" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-[3rem] w-full max-w-md overflow-hidden animate-zoom shadow-2xl">
+      <div class="bg-red-600 p-8 text-white flex justify-between items-center">
+        <div>
+            <h3 class="font-black text-2xl tracking-tighter uppercase italic">Emergência</h3>
+            <p class="text-[10px] opacity-80 font-bold uppercase tracking-widest">Contatos Salvador</p>
+        </div>
+        <button onclick="toggleModal()" class="bg-white/10 hover:bg-white/30 w-12 h-12 rounded-full flex items-center justify-center transition-all">✕</button>
       </div>
-      <div class="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
-        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-          <div><p class="text-[10px] font-black text-slate-400 uppercase">Polícia Militar</p><p class="font-black text-slate-700 text-xl tracking-tighter">190</p></div>
-          <a href="tel:190" class="bg-red-600 text-white px-6 py-2 rounded-xl font-black text-xs shadow-md active:scale-95 transition-all">LIGAR</a>
-        </div>
-        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-          <div><p class="text-[10px] font-black text-slate-400 uppercase">SAMU</p><p class="font-black text-slate-700 text-xl tracking-tighter">192</p></div>
-          <a href="tel:192" class="bg-red-600 text-white px-6 py-2 rounded-xl font-black text-xs shadow-md active:scale-95 transition-all">LIGAR</a>
-        </div>
-        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-          <div><p class="text-[10px] font-black text-slate-400 uppercase">Bombeiros</p><p class="font-black text-slate-700 text-xl tracking-tighter">193</p></div>
-          <a href="tel:193" class="bg-red-600 text-white px-6 py-2 rounded-xl font-black text-xs shadow-md active:scale-95 transition-all">LIGAR</a>
-        </div>
-        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-          <div><p class="text-[10px] font-black text-slate-400 uppercase">Defesa Civil</p><p class="font-black text-slate-700 text-xl tracking-tighter">199</p></div>
-          <a href="tel:199" class="bg-slate-700 text-white px-6 py-2 rounded-xl font-black text-xs shadow-md active:scale-95 transition-all">LIGAR</a>
-        </div>
-        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-          <div><p class="text-[10px] font-black text-slate-400 uppercase">Coelba</p><p class="font-black text-slate-700 text-xl tracking-tighter">116</p></div>
-          <a href="tel:116" class="bg-slate-700 text-white px-6 py-2 rounded-xl font-black text-xs shadow-md active:scale-95 transition-all">LIGAR</a>
-        </div>
-        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-          <div><p class="text-[10px] font-black text-slate-400 uppercase">Embasa</p><p class="font-black text-slate-700 text-lg">0800 0555 195</p></div>
-          <a href="tel:08000555195" class="bg-slate-700 text-white px-6 py-2 rounded-xl font-black text-xs shadow-md active:scale-95 transition-all font-black">LIGAR</a>
-        </div>
+      <div class="p-8 space-y-4 max-h-[60vh] overflow-y-auto">
+        <a href="tel:190" class="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5 hover:bg-red-500/10 transition-all group">
+          <div><p class="text-[9px] font-black text-slate-500 uppercase group-hover:text-red-400">Polícia Militar</p><p class="font-black text-white text-2xl tracking-tighter">190</p></div>
+          <div class="bg-red-600 text-white px-5 py-2 rounded-xl font-black text-xs shadow-lg">LIGAR</div>
+        </a>
+        <a href="tel:192" class="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5 hover:bg-red-500/10 transition-all group">
+          <div><p class="text-[9px] font-black text-slate-500 uppercase group-hover:text-red-400">SAMU</p><p class="font-black text-white text-2xl tracking-tighter">192</p></div>
+          <div class="bg-red-600 text-white px-5 py-2 rounded-xl font-black text-xs shadow-lg">LIGAR</div>
+        </a>
+        <a href="tel:199" class="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5 hover:bg-blue-500/10 transition-all">
+          <div><p class="text-[9px] font-black text-slate-500 uppercase">Defesa Civil</p><p class="font-black text-white text-2xl tracking-tighter">199</p></div>
+          <div class="bg-slate-700 text-white px-5 py-2 rounded-xl font-black text-xs shadow-lg">LIGAR</div>
+        </a>
       </div>
     </div>
   </div>
-
-  <footer class="text-center py-12 border-t border-slate-200 mt-10">
-    <p class="text-slate-400 text-[10px] font-black tracking-[0.3em] uppercase italic">&copy; 2026 Alerta JSI - Portal Comunitário</p>
-  </footer>
 
   <script>
     const API_URL = 'https://bot-alerta-bairro.onrender.com/api/status';
 
     function toggleModal() {
-      const modal = document.getElementById('modal-telefones');
-      modal.classList.toggle('hidden');
+      document.getElementById('modal-telefones').classList.toggle('hidden');
+    }
+
+    function compartilhar() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Portal Alerta JSI',
+          text: 'Confira agora o status de segurança do nosso bairro Jardim Santo Inácio:',
+          url: window.location.href
+        });
+      }
     }
 
     async function updateStatus() {
       try {
         const response = await fetch(API_URL);
         const data = await response.json();
-        document.getElementById('status-text').innerText = data.status;
-        document.getElementById('hora-text').innerText = data.hora;
         
+        const statusText = document.getElementById('status-text');
         const indicator = document.getElementById('status-indicator');
-        const section = document.getElementById('status-section');
-        const card = document.getElementById('status-card');
-        const status = data.status;
+        const glow = document.getElementById('status-glow');
+        const horaElement = document.getElementById('hora-text');
+        const status = data.status.toUpperCase();
 
-        if (status.includes("PAZ")) {
-          indicator.className = "h-6 w-6 rounded-full shadow-lg pulse-soft bg-emerald-500 shadow-emerald-200";
-          card.className = "status-transition inline-flex flex-col items-center gap-4 px-10 py-8 rounded-[2rem] bg-emerald-50 border border-emerald-100 text-emerald-900";
-          section.style.background = "rgba(240, 253, 244, 0.8)";
-        } else if (status.includes("PERIGO") || status.includes("ALERTA") || status.includes("ARMADOS")) {
-          indicator.className = "h-6 w-6 rounded-full shadow-lg pulse-soft bg-rose-500 shadow-rose-200";
-          card.className = "status-transition inline-flex flex-col items-center gap-4 px-10 py-8 rounded-[2rem] bg-rose-50 border border-rose-100 text-rose-900";
-          section.style.background = "rgba(255, 241, 242, 0.8)";
+        statusText.innerText = data.status;
+        horaElement.innerText = data.hora;
+
+        // Título Dinâmico na Aba do Navegador
+        if (status.includes("PERIGO") || status.includes("ALERTA") || status.includes("TIROTEIO")) {
+            document.title = "⚠️ ALERTA: " + data.status;
         } else {
-          indicator.className = "h-6 w-6 rounded-full shadow-lg pulse-soft bg-amber-500 shadow-amber-200";
-          card.className = "status-transition inline-flex flex-col items-center gap-4 px-10 py-8 rounded-[2rem] bg-amber-50 border border-amber-100 text-amber-900";
-          section.style.background = "rgba(255, 251, 235, 0.8)";
+            document.title = "Portal Alerta JSI - Oficial";
+        }
+
+        statusText.classList.remove('animate-pulse');
+
+        if (status.includes("PAZ") || status.includes("NORMAL")) {
+            statusText.className = "text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-emerald-500";
+            indicator.className = "h-5 w-5 rounded-full bg-emerald-500 pulse-ring paz";
+            glow.style.backgroundColor = "rgba(16, 185, 129, 0.4)";
+        } else if (status.includes("PERIGO") || status.includes("TIROTEIO") || status.includes("ARMADOS") || status.includes("ALERTA")) {
+            statusText.className = "text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-rose-500 animate-pulse";
+            indicator.className = "h-5 w-5 rounded-full bg-rose-500 pulse-ring perigo";
+            glow.style.backgroundColor = "rgba(244, 63, 94, 0.6)";
+        } else {
+            statusText.className = "text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-amber-500";
+            indicator.className = "h-5 w-5 rounded-full bg-amber-500 pulse-ring alerta";
+            glow.style.backgroundColor = "rgba(245, 158, 11, 0.4)";
         }
       } catch (err) {
-        document.getElementById('status-text').innerText = "Conectando...";
+        document.getElementById('status-text').innerText = "OFFLINE";
+        document.getElementById('status-text').className = "text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-slate-600";
       }
     }
 
