@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal Alerta JSI - Monitoramento em Tempo Real</title>
+  <meta name="description" content="Acompanhe em tempo real o status de segurança do Jardim Santo Inácio (JSI): Paz, Alerta ou Perigo. Telefones úteis e central de emergências.">
+  <meta property="og:title" content="Portal Alerta JSI — Monitoramento em Tempo Real">
+  <meta property="og:description" content="Status do bairro atualizado pelo Bot do Telegram. Paz, Alerta ou Perigo.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0b1220">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
@@ -48,6 +56,10 @@
     .animate-shimmer { animation: shimmer 2s infinite; }
     .animate-zoom { animation: zoom 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
     @keyframes zoom { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col justify-between">
@@ -84,7 +96,7 @@
 
         <div id="status-real" class="hidden flex flex-col items-center gap-6">
           <div id="status-indicator" class="h-5 w-5 rounded-full pulse-ring"></div>
-          <h2 id="status-text" class="text-4xl md:text-6xl font-black italic tracking-tighter uppercase transition-all duration-500 text-slate-400">
+          <h2 id="status-text" role="status" aria-live="polite" aria-atomic="true" class="text-4xl md:text-6xl font-black italic tracking-tighter uppercase transition-all duration-500 text-slate-400">
             Sincronizando
           </h2>
         </div>
@@ -92,7 +104,7 @@
         <div class="mt-12 pt-8 border-t border-white/5 flex items-center justify-center gap-6">
           <div class="text-left">
             <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Atualizado às</p>
-            <p id="hora-text" class="text-xl font-bold font-mono text-white">--:--</p>
+            <p id="hora-text" class="text-xl font-bold font-mono text-white" title="Horário de Brasília (BRT)">--:--</p>
           </div>
           <div class="h-10 w-[1px] bg-white/10"></div>
           <div class="text-left">
@@ -104,17 +116,17 @@
     </div>
 
     <div class="w-full max-w-lg mt-10 space-y-4">
-      <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="group relative flex items-center justify-center gap-3 w-full bg-[#0088cc] hover:bg-[#0099e6] text-white py-6 rounded-[2rem] font-black text-xl transition-all shadow-2xl shadow-blue-500/20 overflow-hidden">
+      <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" rel="noopener noreferrer" aria-label="Abrir canal oficial no Telegram" class="group relative flex items-center justify-center gap-3 w-full bg-[#0088cc] hover:bg-[#0099e6] text-white py-6 rounded-[2rem] font-black text-xl transition-all shadow-2xl shadow-blue-500/20 overflow-hidden">
         <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
         <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.891 8.146l-1.897 8.942c-.143.64-.521.797-1.057.497l-2.89-2.13-1.394 1.342c-.154.154-.283.283-.58.283l.206-2.923 5.319-4.805c.231-.206-.05-.32-.358-.114l-6.573 4.138-2.831-.885c-.615-.192-.628-.615.128-.91l11.066-4.264c.513-.192.961.114.761.902z"/></svg>
         ENTRAR NO CANAL OFICIAL
       </a>
       
       <div class="grid grid-cols-2 gap-4">
-        <button onclick="toggleModal()" class="bg-slate-900 border border-slate-800 text-slate-400 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-white transition-all shadow-lg">
+        <button id="btn-telefones" type="button" onclick="toggleModal()" aria-controls="modal-telefones" aria-expanded="false" class="bg-slate-900 border border-slate-800 text-slate-400 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-white transition-all shadow-lg">
           Telefones Úteis
         </button>
-        <button onclick="compartilhar()" class="bg-slate-900 border border-slate-800 text-slate-400 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-white transition-all shadow-lg flex items-center justify-center gap-2">
+        <button type="button" onclick="compartilhar()" class="bg-slate-900 border border-slate-800 text-slate-400 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-white transition-all shadow-lg flex items-center justify-center gap-2">
            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8m-11-4 4-4 4 4m-4-4v13"/></svg>
            Compartilhar
         </button>
@@ -150,14 +162,14 @@
     </p>
   </footer>
 
-  <div id="modal-telefones" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
+  <div id="modal-telefones" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
     <div class="bg-slate-900 border border-slate-800 rounded-[3rem] w-full max-w-md overflow-hidden animate-zoom shadow-2xl">
       <div class="bg-red-600 p-8 text-white flex justify-between items-center shadow-lg">
         <div>
-            <h3 class="font-black text-2xl tracking-tighter uppercase italic">Emergência</h3>
+            <h3 id="modal-title" class="font-black text-2xl tracking-tighter uppercase italic">Emergência</h3>
             <p class="text-[10px] opacity-80 font-bold uppercase tracking-widest">Contatos Salvador & JSI</p>
         </div>
-        <button onclick="toggleModal()" class="bg-white/10 hover:bg-white/30 w-12 h-12 rounded-full flex items-center justify-center transition-all">✕</button>
+        <button type="button" aria-label="Fechar modal" onclick="toggleModal()" class="bg-white/10 hover:bg-white/30 w-12 h-12 rounded-full flex items-center justify-center transition-all">✕</button>
       </div>
       
       <div class="p-6 space-y-3 max-h-[60vh] overflow-y-auto text-left">
@@ -199,13 +211,48 @@
     </div>
   </div>
 
+  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-xl border border-slate-700 shadow-lg z-[200]">
+    Link copiado
+  </div>
+
   <script>
     const API_URL = 'https://bot-alerta-bairro.onrender.com/api/status';
     let statusAnterior = "";
+    let _ultimaFoco = null;
 
-    function toggleModal() {
-      document.getElementById('modal-telefones').classList.toggle('hidden');
+    const modalEl = document.getElementById('modal-telefones');
+    const btnTelefones = document.getElementById('btn-telefones');
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+    function openModal() {
+      _ultimaFoco = document.activeElement;
+      modalEl.classList.remove('hidden');
+      btnTelefones && btnTelefones.setAttribute('aria-expanded', 'true');
+      const firstFocusable = modalEl.querySelector('button, [href], input, [tabindex]:not([tabindex="-1"])');
+      if (firstFocusable) firstFocusable.focus();
     }
+    function closeModal() {
+      modalEl.classList.add('hidden');
+      btnTelefones && btnTelefones.setAttribute('aria-expanded', 'false');
+      if (_ultimaFoco && typeof _ultimaFoco.focus === 'function') _ultimaFoco.focus();
+    }
+    function toggleModal() {
+      if (modalEl.classList.contains('hidden')) openModal(); else closeModal();
+    }
+    modalEl.addEventListener('click', (e) => {
+      if (e.target === modalEl) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modalEl.classList.contains('hidden')) closeModal();
+      if (e.key === 'Tab' && !modalEl.classList.contains('hidden')) {
+        const focusables = modalEl.querySelectorAll('a, button, input, [tabindex]:not([tabindex="-1"])');
+        const list = Array.from(focusables);
+        const first = list[0];
+        const last = list[list.length - 1];
+        if (document.activeElement === last && !e.shiftKey) { e.preventDefault(); first.focus(); }
+        else if (document.activeElement === first && e.shiftKey) { e.preventDefault(); last.focus(); }
+      }
+    });
 
     function compartilhar() {
       if (navigator.share) {
@@ -214,7 +261,27 @@
           text: 'Confira agora o status de segurança do nosso bairro Jardim Santo Inácio:',
           url: window.location.href
         });
+      } else {
+        const url = window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => showToast('Link copiado'));
+        } else {
+          const input = document.createElement('input');
+          input.value = url;
+          document.body.appendChild(input);
+          input.select();
+          try { document.execCommand('copy'); } catch (_) {}
+          document.body.removeChild(input);
+          showToast('Link copiado');
+        }
       }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 2000);
     }
 
     async function updateStatus() {
@@ -241,10 +308,10 @@
         // VIBRAÇÃO E TÍTULO DINÂMICO
         if (status !== statusAnterior) {
           if (status.includes("PERIGO") || status.includes("ALERTA") || status.includes("TIROTEIO")) {
-              document.title = "⚠️ ALERTA: " + data.status;
+              document.title = "⚠️ ALERTA — " + data.status;
               if ("vibrate" in navigator) navigator.vibrate([300, 100, 300]);
           } else {
-              document.title = "Portal Alerta JSI - Oficial";
+              document.title = status.includes("PAZ") ? "ALERTA JSI — Paz" : "ALERTA JSI — Monitorando";
           }
           statusAnterior = status;
         }
@@ -258,21 +325,27 @@
             glow.style.backgroundColor = "rgba(16, 185, 129, 0.4)";
             bg1.className = "absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-emerald-600/20 blur-[120px] rounded-full transition-all duration-1000";
             bg2.className = "absolute bottom-[10%] -right-[10%] w-[30%] h-[30%] bg-emerald-900/10 blur-[100px] rounded-full transition-all duration-1000";
+            if (themeMeta) themeMeta.setAttribute('content', '#059669');
         } else if (status.includes("PERIGO") || status.includes("TIROTEIO") || status.includes("ARMADOS") || status.includes("ALERTA")) {
             statusText.className = "text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-rose-500 animate-pulse";
             indicator.className = "h-5 w-5 rounded-full bg-rose-500 pulse-ring perigo";
             glow.style.backgroundColor = "rgba(244, 63, 94, 0.6)";
             bg1.className = "absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-rose-600/30 blur-[120px] rounded-full transition-all duration-1000";
             bg2.className = "absolute bottom-[10%] -right-[10%] w-[30%] h-[30%] bg-rose-900/20 blur-[100px] rounded-full transition-all duration-1000";
+            if (themeMeta) themeMeta.setAttribute('content', '#be123c');
         } else {
             statusText.className = "text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-amber-500";
             indicator.className = "h-5 w-5 rounded-full bg-amber-500 pulse-ring alerta";
             glow.style.backgroundColor = "rgba(245, 158, 11, 0.4)";
             bg1.className = "absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-amber-600/20 blur-[120px] rounded-full transition-all duration-1000";
+            if (themeMeta) themeMeta.setAttribute('content', '#b45309');
         }
       } catch (err) {
-        document.getElementById('status-text').innerText = "OFFLINE";
-        document.getElementById('status-text').className = "text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-slate-600";
+        const st = document.getElementById('status-text');
+        st.innerText = "OFFLINE";
+        st.className = "text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-slate-600";
+        if (themeMeta) themeMeta.setAttribute('content', '#334155');
+        document.title = "ALERTA JSI — Offline";
       }
     }
 

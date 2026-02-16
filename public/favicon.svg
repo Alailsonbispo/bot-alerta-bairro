@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" ry="14" fill="#0b1220"/>
+  <path d="M32 10l16 8v10c0 9-6.8 17.2-16 20-9.2-2.8-16-11-16-20V18l16-8z" fill="url(#g)"/>
+  <text x="32" y="38" text-anchor="middle" font-size="18" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans" fill="#fff" font-weight="900">JSI</text>
+</svg>
