@@ -1,115 +1,204 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alerta JSI - Monitoramento</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#020617">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; }
-    .glass-card { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .pulse-ring { position: relative; }
-    .pulse-ring::before { content: ''; position: absolute; left: -8px; top: -8px; width: calc(100% + 16px); height: calc(100% + 16px); border-radius: 9999px; animation: pulse-ring 1.8s infinite; background-color: currentColor; opacity: 0.3; }
-    @keyframes pulse-ring { 0% { transform: scale(0.33); opacity: 1; } 100% { opacity: 0; } }
-  </style>
-</head>
-<body class="antialiased bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950 to-slate-950 min-h-screen">
-
-  <div id="bg-glow" class="fixed inset-0 pointer-events-none -z-10 transition-all duration-1000 blur-[120px] opacity-10"></div>
-
-  <main class="container mx-auto px-6 py-12 flex flex-col items-center">
-    <header class="mb-12 text-center">
-      <h1 class="text-6xl md:text-8xl font-black tracking-tighter italic uppercase leading-none">ALERTA<span class="text-blue-500">JSI</span></h1>
-      <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em]">Inteligência Comunitária</p>
-    </header>
-
-    <div class="glass-card w-full max-w-xl rounded-[3rem] p-12 text-center relative overflow-hidden mb-8">
-      <div id="status-indicator" class="h-3 w-3 rounded-full mx-auto mb-6 pulse-ring transition-colors"></div>
-      <h2 id="status-text" class="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-slate-600">Sincronizando...</h2>
-      <p class="mt-8 text-[10px] font-mono text-slate-500 uppercase">Atualizado às <span id="hora-text" class="text-white">--:--</span></p>
-    </div>
-
-    <div class="w-full max-w-xl mb-8">
-        <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4 px-4">Últimas Ocorrências</h3>
-        <div class="glass-card rounded-[2.5rem] p-8" id="noticias-feed">
-            <p class="text-center text-slate-600 text-xs">Aguardando dados...</p>
-        </div>
-    </div>
-
-    <div class="w-full max-w-xl space-y-4">
-        <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="flex items-center justify-center w-full bg-[#0088cc] py-6 rounded-2xl font-black text-lg">CANAL TELEGRAM</a>
-        <div id="install-container" class="hidden">
-            <button id="install-button" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest">Instalar Aplicativo</button>
-        </div>
-    </div>
-  </main>
-
-  <script>
-    const API_URL = 'https://bot-alerta-bairro.onrender.com/api/status';
-
-    async function updateStatus() {
-      try {
-        const r = await fetch(API_URL);
-        const data = await r.json();
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerta JSI - Monitoramento</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#020617">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; scroll-behavior: smooth; }
         
-        const statusText = document.getElementById('status-text');
-        const indicator = document.getElementById('status-indicator');
-        const horaText = document.getElementById('hora-text');
-        const bgGlow = document.getElementById('bg-glow');
-        const feed = document.getElementById('noticias-feed');
+        .glass-card { 
+            background: rgba(15, 23, 42, 0.4); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }
 
-        statusText.innerText = data.status;
-        horaText.innerText = data.hora;
+        .reveal { animation: reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
+        @keyframes reveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        let cor = "#64748b";
-        if (data.status.includes("PAZ")) cor = "#10b981";
-        else if (data.status.includes("PERIGO") || data.status.includes("ALERTA")) cor = "#f43f5e";
-        else if (data.status.includes("POLÍCIA")) cor = "#3b82f6";
+        .scanner-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            animation: scan 3s linear infinite; opacity: 0.3;
+        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
-        statusText.style.color = cor;
-        indicator.style.backgroundColor = cor;
-        indicator.style.color = cor;
-        bgGlow.style.backgroundColor = cor;
+        .pulse-ring { position: relative; }
+        .pulse-ring::before { 
+            content: ''; position: absolute; left: -10px; top: -10px; width: calc(100% + 20px); height: calc(100% + 20px); 
+            border-radius: 9999px; animation: pulse-ring 1.8s infinite; background-color: currentColor; 
+        }
+        @keyframes pulse-ring { 0% { transform: scale(0.33); opacity: 1; } 100% { opacity: 0; } }
+    </style>
+</head>
+<body class="antialiased min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-950 to-slate-950">
 
-        if (data.noticias) {
-            feed.innerHTML = '';
-            data.noticias.forEach(n => {
-                const borda = n.categoria === 'PERIGO' ? 'rose' : 'blue';
-                feed.innerHTML += `<div class="relative pl-6 border-l border-${borda}-500/30 mb-6">
-                    <div class="absolute -left-[4.5px] top-0 h-2 w-2 rounded-full bg-${borda}-500"></div>
-                    <div class="flex justify-between text-[9px] font-black mb-1">
-                        <span class="text-${borda}-500">${n.categoria}</span>
-                        <span class="text-slate-500">${n.hora}</span>
+    <div id="bg-glow" class="fixed inset-0 pointer-events-none -z-10 transition-all duration-1000 blur-[120px] opacity-10"></div>
+
+    <main class="container mx-auto px-6 py-12 flex flex-col items-center">
+        
+        <header class="mb-12 text-center reveal">
+            <h1 class="text-6xl md:text-8xl font-black tracking-tighter italic uppercase leading-none mb-2">
+                ALERTA<span class="text-blue-500">JSI</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em]">Central de Inteligência Comunitária</p>
+        </header>
+
+        <div class="glass-card w-full max-w-xl rounded-[3.5rem] p-12 text-center relative overflow-hidden reveal" style="animation-delay: 0.1s">
+            <div class="scanner-line"></div>
+            <div class="relative z-10">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.5em] mb-8">Condição Atual do Bairro</p>
+                
+                <div id="status-indicator" class="h-3 w-3 rounded-full mx-auto mb-6 pulse-ring transition-all duration-500 bg-slate-600"></div>
+                <h2 id="status-text" class="text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-slate-500 transition-all duration-500">
+                    Sincronizando...
+                </h2>
+
+                <div class="mt-12 flex justify-center items-center gap-8 border-t border-white/5 pt-8">
+                    <div>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Última Atualização</p>
+                        <p id="hora-text" class="text-xl font-black font-mono text-white tracking-tighter">--:--</p>
                     </div>
-                    <p class="text-sm font-semibold text-slate-200">${n.texto}</p>
-                </div>`;
-            });
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-xl mt-12 reveal" style="animation-delay: 0.2s">
+            <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-6 px-4 text-center">Monitor de Ocorrências</h3>
+            <div class="glass-card rounded-[2.5rem] p-8">
+                <div id="noticias-feed" class="space-y-8">
+                    <p class="text-center text-slate-600 text-xs animate-pulse">Conectando ao banco de dados...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-xl mt-8 space-y-4 reveal" style="animation-delay: 0.3s">
+            <a href="https://t.me/AlertaJardimSantoInacio" target="_blank" class="flex items-center justify-center w-full bg-[#0088cc] hover:bg-[#0099e6] text-white py-6 rounded-2xl font-black text-lg transition-all active:scale-[0.98]">
+                CANAL OFICIAL TELEGRAM
+            </a>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="toggleModal()" class="glass-card py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-all">
+                    Contatos Úteis
+                </button>
+                <button id="install-button" class="hidden glass-card py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-blue-400 hover:text-white transition-all border-blue-500/20">
+                    Instalar App
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="modal-telefones" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 backdrop-blur-2xl p-6">
+        <div class="bg-slate-900 border border-white/10 rounded-[3rem] w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="bg-red-600 p-8 text-white flex justify-between items-center">
+                <h3 class="font-black text-2xl tracking-tighter uppercase italic">Emergência</h3>
+                <button onclick="toggleModal()" class="text-2xl">✕</button>
+            </div>
+            <div class="p-6 space-y-3">
+                <a href="tel:190" class="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5">
+                    <div><p class="text-[9px] font-black text-slate-500 uppercase">Polícia Militar</p><p class="font-black text-white text-xl">190</p></div>
+                    <span class="bg-red-600 px-4 py-1.5 rounded-xl font-black text-[10px]">LIGAR</span>
+                </a>
+                <a href="tel:192" class="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5">
+                    <div><p class="text-[9px] font-black text-slate-500 uppercase">SAMU</p><p class="font-black text-white text-xl">192</p></div>
+                    <span class="bg-red-600 px-4 py-1.5 rounded-xl font-black text-[10px]">LIGAR</span>
+                </a>
+                <a href="tel:116" class="flex justify-between items-center p-5 bg-white/5 rounded-2xl border border-white/5">
+                    <div><p class="text-[9px] font-black text-slate-500 uppercase">Coelba</p><p class="font-black text-white text-xl">116</p></div>
+                    <span class="bg-green-600 px-4 py-1.5 rounded-xl font-black text-[10px]">LIGAR</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://bot-alerta-bairro.onrender.com/api/status';
+
+        async function updateStatus() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                const statusText = document.getElementById('status-text');
+                const indicator = document.getElementById('status-indicator');
+                const horaText = document.getElementById('hora-text');
+                const bgGlow = document.getElementById('bg-glow');
+                const feed = document.getElementById('noticias-feed');
+
+                // Atualiza Status Principal
+                statusText.innerText = data.status;
+                horaText.innerText = data.hora;
+
+                let corHex = "#64748b"; // Neutro
+                if (data.status.includes("PAZ")) corHex = "#10b981"; // Verde
+                else if (data.status.includes("PERIGO") || data.status.includes("ALERTA")) corHex = "#f43f5e"; // Vermelho
+                else if (data.status.includes("POLÍCIA")) corHex = "#3b82f6"; // Azul
+
+                statusText.style.color = corHex;
+                indicator.style.backgroundColor = corHex;
+                indicator.style.color = corHex;
+                bgGlow.style.backgroundColor = corHex;
+                bgGlow.style.opacity = "0.15";
+
+                // Atualiza Feed de Notícias
+                if (data.noticias && data.noticias.length > 0) {
+                    feed.innerHTML = '';
+                    data.noticias.forEach(n => {
+                        const corBorda = (n.categoria === 'PERIGO' || n.categoria === 'ALERTA') ? 'rose' : 'blue';
+                        feed.innerHTML += `
+                            <div class="relative pl-6 border-l-2 border-${corBorda}-500/30">
+                                <div class="absolute -left-[5px] top-0 h-2 w-2 rounded-full bg-${corBorda}-500 shadow-[0_0_8px_rgba(0,0,0,0.5)]"></div>
+                                <div class="flex justify-between text-[9px] font-black uppercase tracking-tighter mb-1">
+                                    <span class="text-${corBorda}-500">${n.categoria}</span>
+                                    <span class="text-slate-500 font-mono">${n.hora}</span>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-200 leading-tight">${n.texto}</p>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (err) { 
+                console.error("Erro ao conectar com a API:", err);
+                document.getElementById('status-text').innerText = "OFFLINE";
+            }
         }
-      } catch (e) { console.error(e); }
-    }
 
-    // PWA Logic
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('install-container').classList.remove('hidden');
-    });
-
-    document.getElementById('install-button').addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt = null;
-            document.getElementById('install-container').classList.add('hidden');
+        function toggleModal() {
+            document.getElementById('modal-telefones').classList.toggle('hidden');
         }
-    });
 
-    setInterval(updateStatus, 15000);
-    updateStatus();
-  </script>
+        // Lógica de PWA (Instalação)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-button').classList.remove('hidden');
+        });
+
+        document.getElementById('install-button').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('install-button').classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Loop de atualização (15 segundos)
+        setInterval(updateStatus, 15000);
+        updateStatus();
+    </script>
 </body>
 </html>
