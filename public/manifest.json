@@ -1,0 +1,17 @@
+{
+  "name": "Alerta JSI",
+  "short_name": "AlertaJSI",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#3b82f6",
+  "description": "Monitoramento comunitário Jardim Santo Inácio",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1188/1188530.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
