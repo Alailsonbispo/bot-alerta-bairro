@@ -146,4 +146,46 @@
         horaElement.innerText = data.hora;
 
         // Reset animação
-        statusText.classList.remove('animate-pulse
+        statusText.classList.remove('animate-pulse');
+
+        // Lógica de cores baseada nos Emojis do seu Server.js
+        if (s.includes("🟢")) {
+          statusText.className = "text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-emerald-500 leading-tight";
+          document.documentElement.style.setProperty('--status-color', '#10b981');
+          indicator.style.backgroundColor = "#10b981";
+        } 
+        else if (s.includes("🔴") || s.includes("🟠")) {
+          statusText.className = "text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-rose-500 leading-tight animate-pulse";
+          document.documentElement.style.setProperty('--status-color', '#f43f5e');
+          indicator.style.backgroundColor = "#f43f5e";
+          // Vibra se houver mudança para perigo
+          if (s !== statusAnterior && navigator.vibrate) navigator.vibrate([300, 100, 300]);
+        } 
+        else if (s.includes("🔵")) {
+          statusText.className = "text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-blue-500 leading-tight";
+          document.documentElement.style.setProperty('--status-color', '#3b82f6');
+          indicator.style.backgroundColor = "#3b82f6";
+        }
+        else {
+          statusText.className = "text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-amber-500 leading-tight";
+          document.documentElement.style.setProperty('--status-color', '#f59e0b');
+          indicator.style.backgroundColor = "#f59e0b";
+        }
+        statusAnterior = s;
+      } catch (err) {
+        document.getElementById('status-text').innerText = "OFFLINE";
+        document.getElementById('status-text').className = "text-3xl md:text-5xl font-black italic uppercase text-slate-700";
+      }
+    }
+
+    function toggleModal() { document.getElementById('modal-telefones').classList.toggle('hidden'); }
+    function compartilhar() { 
+      if (navigator.share) navigator.share({ title: 'Alerta JSI', url: window.location.href });
+      else alert("Link: " + window.location.href);
+    }
+
+    setInterval(updateStatus, 10000); // Atualiza a cada 10s
+    updateStatus();
+  </script>
+</body>
+</html>
